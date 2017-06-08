@@ -12,11 +12,13 @@ adjectiveType = 'd'
 articleType = 'p'
 pronounType = 'g'
 adverbType= 'b'
-ten = "rtnslckdpgb"
-twelve = "rtnslckdpgbfy"
+ten = "rtnslckdpg"
+twelve = "rtnslckdpgbf"
+decimals = {twelve[a]: str(a) for a in range(0,12)}
 
 def createWordList():
-    wordList = {a + b + c : a + b + c for a in twelve for b in twelve for c in twelve}
+    #wordList = {a + b + c : a + b + c for a in twelve for b in twelve for c in twelve}
+    wordList = {a: {b + c : "{0} x {1}".format(decimals[b],decimals[c]) for b in twelve for c in twelve} for a in twelve}
     print wordList
 
 def getDefinition(wordKey):
@@ -56,4 +58,4 @@ def toEnglish():
         interpreted = map(interpret, words)
         print interpreted
 
-print toEnglish()
+print createWordList()
