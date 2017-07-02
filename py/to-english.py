@@ -1,20 +1,12 @@
 #!/usr/bin/env python
 import fileinput
-import food
 
-oneType = 'r'
-manyType = 't'
-noneType = 'n'
-everyType = 's'
-mostType = 'l'
-verbType = 'k'
-adjectiveType = 'd'
-articleType = 'p'
-pronounType = 'g'
-adverbType= 'b'
-ten = "rtnslckdpg"
-twelve = "rtnslckdpgbf"
-decimals = {twelve[a]: str(a) for a in range(0,12)}
+ten = "0123456789"
+dot = "."
+minus = "-"
+sep = ":"
+sep2 = "/"
+question = "?"
 
 def createWordList():
     #wordList = {a + b + c : a + b + c for a in twelve for b in twelve for c in twelve}
@@ -27,28 +19,52 @@ def getDefinition(wordKey):
     else:
         return "???"
 
-def interpretNoun(word):
-    plurality = word[:1]
-    coreWord = word[1:6]
-    return getDefinition(coreWord)
+def interpretNumber(word):
+    coreWord = word[1:]
+    number = 0
+    if "." in coreWord:
+        number = float(coreWord)
+    else:
+        number = int(coreWord)
+    return number
 
-def interpretAdjective(word):
-    plurality = word[:1]
-    coreWord = word[1:5]
-    return getDefinition(coreWord)
+def get_soundex(name):
+	"""Get the soundex code for the string"""
+	name = name.upper()
+	soundex = ""
+	soundex += name[0]
+	dictionary = {"BFPV": "1", "CGJKQSXZ":"2", "DT":"3", "L":"4", "MN":"5", "R":"6", "AEIOUHWY":"."}
 
-def interpretVerb(word):
-    plurality = word[:1]
-    coreWord = word[1:5]
-    return getDefinition(coreWord)
+	for char in name[1:]:
+		for key in dictionary.keys():
+			if char in key:
+				code = dictionary[key]
+				if code != soundex[-1]:
+					soundex += code
+
+	soundex = soundex.replace(".", "")
+	soundex = soundex[:4].ljust(4, "0")
+	return soundex
+
+def interpret_number(word):
+    coreWord = word[1:]
+    number = 0
+    if "." in coreWord:
+        number = float(coreWord)
+    else:
+        number = int(coreWord)
+    return number
+
+def interpret_sound(word):
+    coreWord = word[1:]
+    sound = get_soundex(coreWord)
+    return sound
 
 def interpret(word):
-    if word.startswith(oneType) or word.startswith(manyType) or word.startswith(noneType) or word.startswith(everyType) or word.startswith(mostType):
-        return interpretNoun(word)
-    elif word.startswith(adjectiveType):
-        return interpretAdjective(word)
-    elif word.startswith(verbType):
-        return interpretVerb(word)
+    if word.startswith(sep):
+        return interpret_number(word)
+    elif word.startswith(sep2):
+        return interpret_sound(word)
     else:
         return word
 
@@ -58,4 +74,4 @@ def toEnglish():
         interpreted = map(interpret, words)
         print interpreted
 
-print createWordList()
+print toEnglish()
