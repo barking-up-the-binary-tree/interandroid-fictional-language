@@ -1,0 +1,1 @@
+decimal() { tr -cd 'ptkmndbgwjʒðflŋrsʃθvzʒ\n'| sed 's/dʒ/g/g' | sed 's/ð/j/g' | sed 's/f/p/g' | sed 's/l/b/g' | sed 's/ŋ/n/g' | sed 's/r/g/g' | sed 's/s/j/g' | sed 's/ʃ/k/g' | sed 's/tʃ/t/g' | sed 's/θ/p/g' | sed 's/v/w/g' | sed 's/z/m/g' | sed 's/ʒ/n/g' | tr 'ptkmndbgwj' '0123456789';}

@@ -7,6 +7,9 @@ HTML = html
 vocabulary:
 	python tools/inject-vocabulary.py
 
+normalize:
+		python tools/normalize-vocabulary.py
+
 build: build-directory vocabulary html js
 
 build-directory:
@@ -18,4 +21,4 @@ js:
 	elm-make $(SRC)/app.elm --output $(BUILD)/app.js
 
 start:
-	cd docs;python -m SimpleHTTPServer 8000
+	cd docs;python -m SimpleHTTPServer 7000
