@@ -1,58 +1,62 @@
+module Main exposing (Adjectives(..), Adverbs(..), Logic(..), Number(..), Sentence(..), Subject(..), Unit(..), Verb(..), Word(..), godOfWar, main, sentence1)
+
 import Html exposing (text)
 
+
 type Number
-  = D Int
-  | F Float
-  | Minus Number
-  | Exponent Number Number
-  | Multiply (List Number)
-  | Sum (List Number)
-  | Fraction Number Number
-  | Perc Number
-  | Fibonacci Number
-  | Approximate Number
-  | High
-  | Low
-  | Medium
+    = D Int
+    | F Float
+    | Minus Number
+    | Exponent Number Number
+    | Multiply (List Number)
+    | Sum (List Number)
+    | Fraction Number Number
+    | Perc Number
+    | Fibonacci Number
+    | Approximate Number
+    | High
+    | Low
+    | Medium
 
 
 type Logic
- = Yes
- | No
- | Maybe
- | Likely
- | Unlikely
- | Unknown
+    = Yes
+    | No
+    | Maybe
+    | Likely
+    | Unlikely
+    | Unknown
 
 
 type Unit
- = Gram
- | Liter
- | Newton
- | Pascal
- | Ampere
- | Volt
- | Joule
- | Watt
- | Second
- | Minute
- | Hour
- | Day
- | Year
- | Celcius
- | Degree
- | Hertz
- | Byte
- | Vote
- | Line
- | Pixel
- | Flops
- | Count
- | Currency Int
- | Per Unit Unit
- | Square Unit
- | Cubic Unit
- | Coeff Number Unit
+    = Gram
+    | Liter
+    | Newton
+    | Pascal
+    | Ampere
+    | Volt
+    | Joule
+    | Watt
+    | Second
+    | Minute
+    | Hour
+    | Day
+    | Year
+    | Celcius
+    | Degree
+    | Hertz
+    | Byte
+    | Vote
+    | Line
+    | Pixel
+    | Flops
+    | Count
+    | Currency Int
+    | Per Unit Unit
+    | Square Unit
+    | Cubic Unit
+    | Coeff Number Unit
+
 
 type Word
     = W (List Word)
@@ -129,49 +133,54 @@ type Word
     | Of
 
 
-
-
-
 type Adjectives
-  = A
-  | With (List Word)
+    = A
+    | With (List Word)
+
 
 type Adverbs
-  = Including (List Word)
-  | Now
-  | Recently
-  | A_long_time_ago
-  | Soon
-  | In_a_remote_future
-  | Possibly
-  | Do_not
+    = Including (List Word)
+    | Now
+    | Recently
+    | A_long_time_ago
+    | Soon
+    | In_a_remote_future
+    | Possibly
+    | Do_not
+
 
 type Subject
-  = For Adjectives Word
-  | Name Subject
-  | None_of (List Subject)
-  | One_of (List Subject)
-  | Some_of (List Subject)
-  | Most_of (List Subject)
-  | Every_of (List Subject)
-  | Any_of (List Subject)
-  | Reject Subject
+    = For Adjectives Word
+    | Name Subject
+    | None_of (List Subject)
+    | One_of (List Subject)
+    | Some_of (List Subject)
+    | Most_of (List Subject)
+    | Every_of (List Subject)
+    | Any_of (List Subject)
+    | Reject Subject
 
 
 type Verb
-  = Do Adverbs Word
+    = Do Adverbs Word
+
 
 type Sentence
-  = Considering Subject Verb Subject
-  | Then Sentence
-  | Therefore Sentence
-  | BecauseOf Sentence
+    = Considering Subject Verb Subject
+    | Then Sentence
+    | Therefore Sentence
+    | BecauseOf Sentence
 
-godOfWar: Subject
-godOfWar = Name (For A (W [Belief, Person, Of, Period, Without, Agreement]))
 
-sentence1: Sentence
-sentence1= Considering (For (With [Good]) Human) (Do Now Add) (For (With [Good]) Robot)
+godOfWar : Subject
+godOfWar =
+    Name (For A (W [ Belief, Person, Of, Period, Without, Agreement ]))
+
+
+sentence1 : Sentence
+sentence1 =
+    Considering (For (With [ Good ]) Human) (Do Now Add) (For (With [ Good ]) Robot)
+
 
 main =
-  text (toString (sentence1))
+    text (toString sentence1)

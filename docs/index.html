@@ -6,17 +6,19 @@
 
     <title>Translation for Interandroid</title>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.99.0/css/materialize.min.css">
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.99.0/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+            
+    <script src="app.js"></script>
 
   </head>
   <body>
     <!-- elm -->
-    <div id="main"></div>
-    <script src="app.js"></script>
+    <div id="elm"></div>
     <script>
-        var node = document.getElementById('main');
-        var app = Elm.App.embed(node);
-    </script>
+      var app = Elm.App.init({
+          node: document.getElementById('elm')
+      });
+  </script>
   </body>

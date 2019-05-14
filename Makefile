@@ -18,7 +18,13 @@ build-directory:
 html:
 		cp $(HTML)/index.html $(BUILD)/index.html
 js:
-	elm-make $(SRC)/app.elm --output $(BUILD)/app.js
+	elm make $(SRC)/App.elm --output $(BUILD)/app.js
 
 start:
 	cd docs;python -m SimpleHTTPServer 7000
+
+beautify:
+	cd elm; elm-format src/ --yes
+
+test:
+	cd elm; elm-test
