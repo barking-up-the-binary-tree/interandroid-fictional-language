@@ -1,14 +1,11 @@
 .PHONY: html js
 
-SRC = elm
+SRC = src
 BUILD = docs
-HTML = html
+HTML = elm/html
 
 vocabulary:
 	python tools/inject-vocabulary.py
-
-normalize:
-		python tools/normalize-vocabulary.py
 
 build: build-directory vocabulary html js
 
@@ -16,12 +13,12 @@ build-directory:
 	mkdir -p $(BUILD)
 
 html:
-		cp $(HTML)/index.html $(BUILD)/index.html
+	cp $(HTML)/index.html $(BUILD)/index.html
 js:
-	elm make $(SRC)/App.elm --output $(BUILD)/app.js
+	cd elm; elm make $(SRC)/App.elm --output ../$(BUILD)/app.js
 
 start:
-	cd docs;python -m SimpleHTTPServer 7000
+	open http://localhost:7000; cd docs;python -m SimpleHTTPServer 7000
 
 beautify:
 	cd elm; elm-format src/ --yes

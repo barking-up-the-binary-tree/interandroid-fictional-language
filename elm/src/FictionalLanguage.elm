@@ -1,4 +1,4 @@
-module FictionalLanguage exposing (FieldModel, engToHexa, hexaToEng, hexaToListFieldModel, hexaToPhonetic, hexaToVisual, visualToHexa)
+module FictionalLanguage exposing (engToHexa, hexaToEng, hexaToPhonetic, hexaToVisual, visualToHexa)
 
 {-| FromEnglish
 
@@ -9,7 +9,7 @@ module FictionalLanguage exposing (FieldModel, engToHexa, hexaToEng, hexaToListF
 
 import Array exposing (Array, fromList, get)
 import Dict exposing (Dict, fromList, get)
-import FictionalWords exposing (csvContent, csvSpecialWords)
+import FictionalWords exposing (csvContent)
 import List exposing (map, range)
 import Maybe exposing (withDefault)
 import String exposing (cons, contains, dropLeft, foldr, join, lines, split, startsWith, trim, words)
@@ -22,14 +22,6 @@ unknownWord =
 
 unknownHexa =
     "??"
-
-
-type alias FieldModel =
-    { text : String
-    , style : String
-    , hint : String
-    , hintStyle : String
-    }
 
 
 zip : List a -> List b -> List ( a, b )
@@ -50,11 +42,6 @@ toHexa s =
 toEng : List Word -> List String
 toEng s =
     map wordToEng s
-
-
-toListFieldModel : List Word -> List FieldModel
-toListFieldModel s =
-    map wordToFieldModel s
 
 
 toComposedWordsX : List String -> Word
@@ -90,11 +77,6 @@ engToHexa s =
 hexaToEng : String -> String
 hexaToEng s =
     words s |> map hexaToWord |> toEng |> join " "
-
-
-hexaToListFieldModel : String -> List FieldModel
-hexaToListFieldModel s =
-    words s |> map hexaToWord |> toListFieldModel
 
 
 hexaToConsOrVowel : ( String, Bool ) -> String
@@ -168,11 +150,6 @@ getOrDefaultDict index dict =
     withDefault unknownWord (Dict.get index dict)
 
 
-specialWord : String -> String
-specialWord index =
-    withDefault "" (Dict.get index specialWordDict)
-
-
 arrayToTuple : Array String -> ( String, String )
 arrayToTuple arr =
     ( getOrDefaultArr 0 arr, getOrDefaultArr 1 arr )
@@ -187,12 +164,6 @@ wordList : List ( String, String )
 wordList =
     lines csvContent |> List.map csvToTuple
 
-
-specialWordList : List ( String, String )
-specialWordList =
-    lines csvSpecialWords |> List.map csvToTuple
-
-
 swapWordList =
     map (\t -> ( second t, first t )) wordList
 
@@ -203,11 +174,6 @@ wordDict =
 
 swapWordDict =
     Dict.fromList swapWordList
-
-
-specialWordDict =
-    Dict.fromList specialWordList
-
 
 wordToHexa : Word -> String
 wordToHexa s =
@@ -247,18 +213,6 @@ wordToEng s =
 
         W w ->
             w
-
-
-wordToFieldModel : Word -> FieldModel
-wordToFieldModel s =
-    let
-        eng =
-            wordToEng s
-
-        hintStyle =
-            specialWord eng
-    in
-    { text = eng, style = "a1", hint = hintStyle, hintStyle = hintStyle }
 
 
 engToWord : String -> Word

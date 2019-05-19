@@ -1,7 +1,7 @@
 {
     "type": "application",
     "source-directories": [
-        "elm"
+        "src"
     ],
     "elm-version": "0.19.0",
     "dependencies": {
@@ -18,7 +18,13 @@
         }
     },
     "test-dependencies": {
-        "direct": {},
-        "indirect": {}
+        "direct": {
+            "elm-explorations/test": "1.2.1",
+            "elm-community/random-extra": "3.1.0"
+        },
+        "indirect": {
+            "elm/random": "1.0.0",
+            "owanturist/elm-union-find": "1.0.0"
+        }
     }
 }

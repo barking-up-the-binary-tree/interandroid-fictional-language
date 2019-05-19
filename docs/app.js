@@ -5705,147 +5705,6 @@ var author$project$App$switchBox = F3(
 						]))
 				]));
 	});
-var author$project$App$stylish = elm$core$Dict$fromList(
-	_List_fromArray(
-		[
-			_Utils_Tuple2('conjunction', 'chip'),
-			_Utils_Tuple2('verb-start', 'chip'),
-			_Utils_Tuple2('verb-end', 'chip')
-		]));
-var author$project$App$asStyle = function (index) {
-	return A2(
-		elm$core$Maybe$withDefault,
-		'',
-		A2(elm$core$Dict$get, index, author$project$App$stylish));
-};
-var elm$html$Html$td = _VirtualDom_node('td');
-var author$project$App$tdChip = function (fmodel) {
-	return A2(
-		elm$html$Html$td,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				elm$html$Html$div,
-				_List_fromArray(
-					[
-						elm$html$Html$Attributes$class(
-						author$project$App$asStyle(fmodel.hintStyle))
-					]),
-				_List_fromArray(
-					[
-						elm$html$Html$text(fmodel.hint)
-					]))
-			]));
-};
-var elm$html$Html$tr = _VirtualDom_node('tr');
-var author$project$App$columnChip = function (list) {
-	return A2(
-		elm$html$Html$tr,
-		_List_Nil,
-		A2(elm$core$List$map, author$project$App$tdChip, list));
-};
-var author$project$App$tdText = function (fmodel) {
-	return A2(
-		elm$html$Html$td,
-		_List_fromArray(
-			[
-				elm$html$Html$Attributes$class(
-				author$project$App$asStyle(fmodel.style))
-			]),
-		_List_fromArray(
-			[
-				elm$html$Html$text(fmodel.text)
-			]));
-};
-var author$project$App$columnInfo = function (list) {
-	return A2(
-		elm$html$Html$tr,
-		_List_Nil,
-		A2(elm$core$List$map, author$project$App$tdText, list));
-};
-var elm$html$Html$table = _VirtualDom_node('table');
-var elm$html$Html$tbody = _VirtualDom_node('tbody');
-var author$project$App$tableInfo = F2(
-	function (model, trModel) {
-		return A2(
-			elm$html$Html$div,
-			_List_fromArray(
-				[
-					elm$html$Html$Attributes$class('')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					elm$html$Html$div,
-					_List_fromArray(
-						[
-							elm$html$Html$Attributes$class('col s1')
-						]),
-					_List_Nil),
-					A2(
-					elm$html$Html$div,
-					_List_fromArray(
-						[
-							elm$html$Html$Attributes$class('col s11')
-						]),
-					_List_fromArray(
-						[
-							A2(
-							elm$html$Html$h5,
-							_List_fromArray(
-								[
-									elm$html$Html$Attributes$class(
-									author$project$App$colorSection(model.fromEng))
-								]),
-							_List_fromArray(
-								[
-									elm$html$Html$text('Structure')
-								])),
-							A2(
-							elm$html$Html$table,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A2(
-									elm$html$Html$tbody,
-									_List_Nil,
-									_List_fromArray(
-										[
-											author$project$App$columnInfo(trModel),
-											author$project$App$columnChip(trModel)
-										]))
-								]))
-						]))
-				]));
-	});
-var author$project$FictionalWords$csvSpecialWords = '\na_long_time_ago,verb-start\ndo_not,verb-start\ndown_to,verb-end\nin_a_remote_future,verb-start\nnow,verb-start\npossibly,verb-start\nrecently,verb-start\nsoon,verb-start\ntoward,verb-end\nup_to,verb-end\n  ';
-var author$project$FictionalLanguage$specialWordList = A2(
-	elm$core$List$map,
-	author$project$FictionalLanguage$csvToTuple,
-	elm$core$String$lines(author$project$FictionalWords$csvSpecialWords));
-var author$project$FictionalLanguage$specialWordDict = elm$core$Dict$fromList(author$project$FictionalLanguage$specialWordList);
-var author$project$FictionalLanguage$specialWord = function (index) {
-	return A2(
-		elm$core$Maybe$withDefault,
-		'',
-		A2(elm$core$Dict$get, index, author$project$FictionalLanguage$specialWordDict));
-};
-var author$project$FictionalLanguage$wordToFieldModel = function (s) {
-	var eng = author$project$FictionalLanguage$wordToEng(s);
-	var hintStyle = author$project$FictionalLanguage$specialWord(eng);
-	return {hint: hintStyle, hintStyle: hintStyle, style: 'a1', text: eng};
-};
-var author$project$FictionalLanguage$toListFieldModel = function (s) {
-	return A2(elm$core$List$map, author$project$FictionalLanguage$wordToFieldModel, s);
-};
-var author$project$FictionalLanguage$hexaToListFieldModel = function (s) {
-	return author$project$FictionalLanguage$toListFieldModel(
-		A2(
-			elm$core$List$map,
-			author$project$FictionalLanguage$hexaToWord,
-			elm$core$String$words(s)));
-};
 var author$project$FictionalLanguage$hexaToCons = function (s) {
 	switch (s) {
 		case '0':
@@ -6042,7 +5901,6 @@ var elm$html$Html$Events$onInput = function (tagger) {
 };
 var author$project$App$view = function (model) {
 	var asHexa = A2(author$project$App$textToHexa, model.fromEng, model.text);
-	var asListFieldModel = author$project$FictionalLanguage$hexaToListFieldModel(asHexa);
 	var asPhonetic = author$project$FictionalLanguage$hexaToPhonetic(asHexa);
 	var asVisual = author$project$FictionalLanguage$hexaToVisual(asHexa);
 	var asEng = author$project$FictionalLanguage$hexaToEng(asHexa);
@@ -6116,8 +5974,7 @@ var author$project$App$view = function (model) {
 										A2(
 										author$project$App$area,
 										asEng,
-										{fromEng: model.fromEng, id: 'disabled', title: 'English'}),
-										A2(author$project$App$tableInfo, model, asListFieldModel)
+										{fromEng: model.fromEng, id: 'disabled', title: 'English'})
 									]))
 							]))
 					]))

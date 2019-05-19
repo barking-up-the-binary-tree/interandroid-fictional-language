@@ -12,15 +12,6 @@ def loadVocabulary():
                 vocab[row[1]] = row[0].strip()
     return sorted(vocab.items(), key=itemgetter(1))
 
-def loadSpecialWords():
-    special = {}
-    with open('data/special-words.csv', 'rb') as tsvfile:
-        vreader = csv.reader(tsvfile, delimiter=',')
-        for row in vreader:
-            if len(row) == 2:
-                special[row[0]] = row[1].strip()
-    return sorted(special.items(), key=itemgetter(0))
-
 def writeElmScript(lines):
     with open('elm/FictionalWords.elm', 'w') as file:
         file.write("\n".join(lines))
@@ -49,17 +40,13 @@ def csvContent(vocabulary):
 def csvContent2(vocabulary):
     return [asEng(word[0].strip()) + "," + word[1].strip() for word in vocabulary]
 
-def createElmScript(vocabulary, specialWords):
-    content = ["module FictionalWords exposing(csvContent, csvSpecialWords)"]
-    content.append('csvSpecialWords = """')
-    content.extend(csvContent2(specialWords))
-    content.append('  """')
+def createElmScript(vocabulary):
+    content = ["module FictionalWords exposing(csvContent)"]
     content.append('csvContent = """')
     content.extend(csvContent(vocabulary))
     content.append('  """')
     writeElmScript(content)
 
 vocabulary = loadVocabulary()
-specialWords = loadSpecialWords()
 
-createElmScript(vocabulary, specialWords)
+createElmScript(vocabulary)

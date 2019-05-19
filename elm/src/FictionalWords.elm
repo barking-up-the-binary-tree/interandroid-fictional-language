@@ -1,4 +1,16 @@
-module FictionalWords exposing(csvContent)
+module FictionalWords exposing(csvContent, csvSpecialWords)
+csvSpecialWords = """
+a_long_time_ago,verb-start
+do_not,verb-start
+down_to,verb-end
+in_a_remote_future,verb-start
+now,verb-start
+possibly,verb-start
+recently,verb-start
+soon,verb-start
+toward,verb-end
+up_to,verb-end
+  """
 csvContent = """
 about_page,6107
 accept,2901

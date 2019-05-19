@@ -1,4 +1,4 @@
-module App exposing (Document, Metadata, Model, Msg(..), area, asStyle, colorInput, colorSection, columnChip, columnInfo, defaultModel, eCol, hexaToText, iCol, init, main, stylish, subscriptions, switchBox, tableInfo, tdChip, tdText, textToHexa, update, view)
+module App exposing (..)
 
 {-| App
 
@@ -9,7 +9,7 @@ module App exposing (Document, Metadata, Model, Msg(..), area, asStyle, colorInp
 
 import Browser
 import Dict exposing (fromList, get)
-import FictionalLanguage exposing (FieldModel, engToHexa, hexaToEng, hexaToListFieldModel, hexaToPhonetic, hexaToVisual, visualToHexa)
+import FictionalLanguage exposing (engToHexa, hexaToEng, hexaToPhonetic, hexaToVisual, visualToHexa)
 import Html exposing (Html, div, fieldset, form, h2, h5, input, label, p, span, table, tbody, td, text, textarea, tr)
 import Html.Attributes exposing (class, id, type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -143,45 +143,6 @@ switchBox msg name1 name2 =
             ]
         ]
 
-
-tdText : FieldModel -> Html Msg
-tdText fmodel =
-    td [ class (asStyle fmodel.style) ] [ text fmodel.text ]
-
-
-tdChip : FieldModel -> Html Msg
-tdChip fmodel =
-    td [] [ div [ class (asStyle fmodel.hintStyle) ] [ text fmodel.hint ] ]
-
-
-columnInfo : List FieldModel -> Html Msg
-columnInfo list =
-    tr [] (List.map tdText list)
-
-
-columnChip : List FieldModel -> Html Msg
-columnChip list =
-    tr [] (List.map tdChip list)
-
-
-tableInfo : Model -> List FieldModel -> Html Msg
-tableInfo model trModel =
-    div [ class "" ]
-        [ div [ class "col s1" ]
-            []
-        , div [ class "col s11" ]
-            [ h5 [ class (colorSection model.fromEng) ]
-                [ text "Structure" ]
-            , table []
-                [ tbody []
-                    [ columnInfo trModel
-                    , columnChip trModel
-                    ]
-                ]
-            ]
-        ]
-
-
 textToHexa : Bool -> String -> String
 textToHexa fromEng text =
     if fromEng then
@@ -215,8 +176,6 @@ view model =
         asEng =
             hexaToEng asHexa
 
-        asListFieldModel =
-            hexaToListFieldModel asHexa
     in
     { title = "Interandroid-fictional-language"
     , body =
@@ -231,7 +190,6 @@ view model =
                     , area asVisual { title = "Visual", id = "disabled", fromEng = model.fromEng }
                     , area asPhonetic { title = "Phonetic", id = "disabled", fromEng = model.fromEng }
                     , area asEng { title = "English", id = "disabled", fromEng = model.fromEng }
-                    , tableInfo model asListFieldModel
                     ]
                 ]
             ]
