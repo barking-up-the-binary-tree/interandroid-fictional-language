@@ -9,6 +9,9 @@ vocabulary:
 
 build: build-directory vocabulary html js
 
+org:
+	python tools/organize-vocabulary.py
+
 build-directory:
 	mkdir -p $(BUILD)
 
