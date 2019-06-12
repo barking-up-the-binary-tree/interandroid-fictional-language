@@ -379,6 +379,16 @@ az["building_type"] ="Silo, Hotel, Skyscraper,Retailing, Supermarket, Warehouse,
 
 az["nature_type"] ="fish, amphibian, Reptile, Bird, mammal, Arthropod, insect, spider, Mollusc, Echinoderm, Annelid, plant, Mineral"
 az["sensors"] ="sight, Hearing, Taste, Smell, Touch, balance, Temperature_sense, Proprioception, pain, Magnetoception, Sexual stimulation, interoception, Hunger, Chronoception, Agency_sense, Familiarity, Echolocation, Electroreception, Hygroreception, Infrared sensing"
+az["tenses"] = "past, present, future, hypothesis"
+az["positive_probability"] = "likely, very_likely"
+az["negative_probability"] = "rarely, uncertainly,"
+az["tense_keyword"] = "not, question"
+
 
 for k in az:
-    print k, az[k]
+    value = az[k]
+    isString = isinstance(value, basestring)
+    if isString:
+        print k, value.count(",")
+    else:
+        print k, len(value)
