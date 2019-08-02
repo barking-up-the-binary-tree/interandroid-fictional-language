@@ -33,9 +33,9 @@ az["comparator"] = "equal:0, is greater than, is less than, is less than or equa
 az["trigonometry"] = "pi,cosine,sine,tangent,arccosine, arcsine, arctangent"
 az["infinity"] = "infinity,negative_infinity"
 az["asType"] = "boolean, natural_number, integer, rational_number, real_number, complex_number"
-az["integer_sequence"] = "even_numbers, odd_numbers, prime_numbers, Fibonacci_numbers, perfect_numbers, irrational_numbers, Algebraic_numbers, Transcendental_numbers, Constructible_numbers, Computable_numbers"
+az["*integer_sequence"] = "even_numbers, odd_numbers, prime_numbers, Fibonacci_numbers, perfect_numbers, irrational_numbers, Algebraic_numbers, Transcendental_numbers, Constructible_numbers, Computable_numbers"
 az["irrational_numbers"] = "pi,euler_number,golden_ratio"
-az["figure"] = "Dot:1, line:2, triangle:3, quadrilateral:4, pentagon:5, hexagon:6, heptagon:7, octagon:8"
+az["*figure"] = "Dot:1, line:2, triangle:3, quadrilateral:4, pentagon:5, hexagon:6, heptagon:7, octagon:8"
 az["shapeLike"] = "ellipse, polygon, star, crescent, annulus, lens,  spiral"
 az["todo12"] = "Perimeter, area"
 az["directions"] = "Forward, forward_right, right, backward_right, backward, backward-left, left, forward-left"
@@ -46,13 +46,13 @@ az["crud"] = "create, update, append, swap, read, set, delete, transform, evolve
 az["suffixes2"] = "Few, many, without"
 az["list_management"] = "first, last, find, reverse, sort, filter, reject, map, count, sample, shuffle, max, min, mean, sum, pick, omit, repeat, range, add_left, add_right, reduce_from_left, reduce_from_right, member_of, all_satisfies, any_satisfies, append, flatten, is_empty, rest, drop, partition"
 az["timeUnit"] = "Now, century, year, month, day, minute, second, milliseconds, microseconds, nanoseconds"
-az["player"] = "Play, rewind, fast_forward, pause, reverse, stop, skip_previous, skip_next, record, eject, repeat_forever, repeat_once, replay, Help, Listen"
+az["player"] = "Play, rewind, fast_forward, pause, reverse, stop, skip_previous, skip_next, repeat_forever, repeat_once, replay"
 az["spinner"] = "Increase/decrease, Show/hide, Zoom_in/zoom_out, Private/public, Open/Close, OK/KO"
 az["answer"] = "Yes, No, Maybe, Do_not know, Do_not understand"
 
 az["building_type"] ="Silo, Hotel, Skyscraper,Retailing, Supermarket, Warehouse, Restaurant, Dormitory, Apartment, House, Hospital, Archive, School, Library, Museum, Theater, Embassy, Palace, Prison, Factory, Arsenal, Citadel, Castle, Aircraft, Spacecraft, Temple, Airport, Bridge, Canal, Road, Skyway, Tunnel, Stadium, Construction, Park, Playground, Port"
 
-az["nature_type"] ="fish, amphibian, Reptile, Bird, mammal, Arthropod, insect, spider, Mollusc, Echinoderm, Annelid, plant, Mineral"
+az["nature_type"] ="fish, amphibian, Reptile, Bird, mammal, Arthropod, insect, spider, Mollusc, Echinoderm, Annelid, plant"
 az["sensors"] ="sight, Hearing, Taste, Smell, Touch, balance, Temperature_sense, Proprioception, pain, Magnetoception, Sexual stimulation, interoception, Hunger, Chronoception, Agency_sense, Familiarity, Echolocation, Electroreception, Hygroreception, Infrared sensing"
 az["tenses"] = "past, present, future, hypothesis"
 az["positive_probability"] = "likely, very_likely"
@@ -70,8 +70,9 @@ def asArrayForKey(k):
 def summarize():
     for k in az:
         items = asArrayForKey(k)
-        if '*' not in k:
-            print k, len(items)
+        length = len(items)
+        if '*' not in k and length>12:
+            print k, length
 
 summarize()
 
