@@ -1,5 +1,0 @@
-status :404
-status :-999
-ean :1234567890123
-dewey :891.6
-wikipedia /Japanese

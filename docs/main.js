@@ -5319,10 +5319,14 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Main$OnGetText = F2(
-	function (a, b) {
-		return {$: 'OnGetText', a: a, b: b};
-	});
+var $author$project$Main$OnGotTasksBack = function (a) {
+	return {$: 'OnGotTasksBack', a: a};
+};
+var $author$project$DocumentId$AttributionDoc = {$: 'AttributionDoc'};
+var $author$project$DocumentId$CoreDoc = {$: 'CoreDoc'};
+var $author$project$DocumentId$DescriptionDoc = {$: 'DescriptionDoc'};
+var $author$project$DocumentId$MediaDoc = {$: 'MediaDoc'};
+var $author$project$DocumentId$TranslationDoc = {$: 'TranslationDoc'};
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
 		return {$: 'BadStatus_', a: a, b: b};
@@ -5865,267 +5869,590 @@ var $elm$core$Dict$update = F3(
 			return A2($elm$core$Dict$remove, targetKey, dictionary);
 		}
 	});
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
-var $elm$http$Http$expectStringResponse = F2(
-	function (toMsg, toResult) {
-		return A3(
-			_Http_expect,
-			'',
-			$elm$core$Basics$identity,
-			A2($elm$core$Basics$composeR, toResult, toMsg));
-	});
-var $elm$http$Http$BadBody = function (a) {
-	return {$: 'BadBody', a: a};
-};
-var $elm$http$Http$BadStatus = function (a) {
-	return {$: 'BadStatus', a: a};
-};
-var $elm$http$Http$BadUrl = function (a) {
-	return {$: 'BadUrl', a: a};
-};
-var $elm$http$Http$NetworkError = {$: 'NetworkError'};
-var $elm$http$Http$Timeout = {$: 'Timeout'};
-var $elm$core$Result$mapError = F2(
-	function (f, result) {
-		if (result.$ === 'Ok') {
-			var v = result.a;
-			return $elm$core$Result$Ok(v);
-		} else {
-			var e = result.a;
-			return $elm$core$Result$Err(
-				f(e));
-		}
-	});
-var $elm$http$Http$resolve = F2(
-	function (toResult, response) {
+var $elm$http$Http$emptyBody = _Http_emptyBody;
+var $author$project$Main$handleStringResponse = F2(
+	function (docId, response) {
 		switch (response.$) {
 			case 'BadUrl_':
 				var url = response.a;
 				return $elm$core$Result$Err(
-					$elm$http$Http$BadUrl(url));
+					_List_fromArray(
+						['Bad Url ' + url]));
 			case 'Timeout_':
-				return $elm$core$Result$Err($elm$http$Http$Timeout);
-			case 'NetworkError_':
-				return $elm$core$Result$Err($elm$http$Http$NetworkError);
-			case 'BadStatus_':
-				var metadata = response.a;
 				return $elm$core$Result$Err(
-					$elm$http$Http$BadStatus(metadata.statusCode));
+					_List_fromArray(
+						['Timeout']));
+			case 'BadStatus_':
+				var statusCode = response.a.statusCode;
+				return $elm$core$Result$Err(
+					_List_fromArray(
+						[
+							'Bad status ' + $elm$core$String$fromInt(statusCode)
+						]));
+			case 'NetworkError_':
+				return $elm$core$Result$Err(
+					_List_fromArray(
+						['Network error']));
 			default:
 				var body = response.b;
-				return A2(
-					$elm$core$Result$mapError,
-					$elm$http$Http$BadBody,
-					toResult(body));
+				return $elm$core$Result$Ok(
+					_Utils_Tuple2(docId, body));
 		}
 	});
-var $elm$http$Http$expectString = function (toMsg) {
-	return A2(
-		$elm$http$Http$expectStringResponse,
-		toMsg,
-		$elm$http$Http$resolve($elm$core$Result$Ok));
+var $elm$http$Http$stringResolver = A2(_Http_expect, '', $elm$core$Basics$identity);
+var $elm$core$Task$fail = _Scheduler_fail;
+var $elm$http$Http$resultToTask = function (result) {
+	if (result.$ === 'Ok') {
+		var a = result.a;
+		return $elm$core$Task$succeed(a);
+	} else {
+		var x = result.a;
+		return $elm$core$Task$fail(x);
+	}
 };
-var $elm$http$Http$emptyBody = _Http_emptyBody;
-var $elm$http$Http$Request = function (a) {
-	return {$: 'Request', a: a};
+var $elm$http$Http$task = function (r) {
+	return A3(
+		_Http_toTask,
+		_Utils_Tuple0,
+		$elm$http$Http$resultToTask,
+		{allowCookiesFromOtherDomains: false, body: r.body, expect: r.resolver, headers: r.headers, method: r.method, timeout: r.timeout, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
-var $elm$http$Http$State = F2(
-	function (reqs, subs) {
-		return {reqs: reqs, subs: subs};
-	});
-var $elm$http$Http$init = $elm$core$Task$succeed(
-	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
-var $elm$core$Process$kill = _Scheduler_kill;
-var $elm$core$Process$spawn = _Scheduler_spawn;
-var $elm$http$Http$updateReqs = F3(
-	function (router, cmds, reqs) {
-		updateReqs:
-		while (true) {
-			if (!cmds.b) {
-				return $elm$core$Task$succeed(reqs);
-			} else {
-				var cmd = cmds.a;
-				var otherCmds = cmds.b;
-				if (cmd.$ === 'Cancel') {
-					var tracker = cmd.a;
-					var _v2 = A2($elm$core$Dict$get, tracker, reqs);
-					if (_v2.$ === 'Nothing') {
-						var $temp$router = router,
-							$temp$cmds = otherCmds,
-							$temp$reqs = reqs;
-						router = $temp$router;
-						cmds = $temp$cmds;
-						reqs = $temp$reqs;
-						continue updateReqs;
-					} else {
-						var pid = _v2.a;
-						return A2(
-							$elm$core$Task$andThen,
-							function (_v3) {
-								return A3(
-									$elm$http$Http$updateReqs,
-									router,
-									otherCmds,
-									A2($elm$core$Dict$remove, tracker, reqs));
-							},
-							$elm$core$Process$kill(pid));
-					}
-				} else {
-					var req = cmd.a;
-					return A2(
-						$elm$core$Task$andThen,
-						function (pid) {
-							var _v4 = req.tracker;
-							if (_v4.$ === 'Nothing') {
-								return A3($elm$http$Http$updateReqs, router, otherCmds, reqs);
-							} else {
-								var tracker = _v4.a;
-								return A3(
-									$elm$http$Http$updateReqs,
-									router,
-									otherCmds,
-									A3($elm$core$Dict$insert, tracker, pid, reqs));
-							}
-						},
-						$elm$core$Process$spawn(
-							A3(
-								_Http_toTask,
-								router,
-								$elm$core$Platform$sendToApp(router),
-								req)));
-				}
-			}
-		}
-	});
-var $elm$http$Http$onEffects = F4(
-	function (router, cmds, subs, state) {
+var $author$project$DocumentId$toString = function (docId) {
+	switch (docId.$) {
+		case 'AttributionDoc':
+			return 'attribution.json';
+		case 'DescriptionDoc':
+			return 'core-vocabulary-description.json';
+		case 'MediaDoc':
+			return 'core-vocabulary-media.json';
+		case 'TranslationDoc':
+			return 'core-vocabulary-translation.csv';
+		default:
+			return 'core-vocabulary.txt';
+	}
+};
+var $author$project$DocumentId$toRelativeUrl = F2(
+	function (lang, docId) {
 		return A2(
-			$elm$core$Task$andThen,
-			function (reqs) {
-				return $elm$core$Task$succeed(
-					A2($elm$http$Http$State, reqs, subs));
-			},
-			A3($elm$http$Http$updateReqs, router, cmds, state.reqs));
+			$elm$core$String$join,
+			'/',
+			_List_fromArray(
+				[
+					'data',
+					lang,
+					$author$project$DocumentId$toString(docId)
+				]));
 	});
-var $elm$core$List$maybeCons = F3(
-	function (f, mx, xs) {
-		var _v0 = f(mx);
-		if (_v0.$ === 'Just') {
-			var x = _v0.a;
-			return A2($elm$core$List$cons, x, xs);
-		} else {
-			return xs;
-		}
+var $author$project$Main$taskReferenceModel = F2(
+	function (lang, docId) {
+		return $elm$http$Http$task(
+			{
+				body: $elm$http$Http$emptyBody,
+				headers: _List_Nil,
+				method: 'GET',
+				resolver: $elm$http$Http$stringResolver(
+					$author$project$Main$handleStringResponse(docId)),
+				timeout: $elm$core$Maybe$Nothing,
+				url: A2($author$project$DocumentId$toRelativeUrl, lang, docId)
+			});
 	});
-var $elm$core$List$filterMap = F2(
-	function (f, xs) {
-		return A3(
-			$elm$core$List$foldr,
-			$elm$core$List$maybeCons(f),
-			_List_Nil,
-			xs);
+var $author$project$Main$allTasks = function (lang) {
+	return $elm$core$Task$sequence(
+		_List_fromArray(
+			[
+				A2($author$project$Main$taskReferenceModel, lang, $author$project$DocumentId$AttributionDoc),
+				A2($author$project$Main$taskReferenceModel, lang, $author$project$DocumentId$DescriptionDoc),
+				A2($author$project$Main$taskReferenceModel, lang, $author$project$DocumentId$MediaDoc),
+				A2($author$project$Main$taskReferenceModel, lang, $author$project$DocumentId$TranslationDoc),
+				A2($author$project$Main$taskReferenceModel, lang, $author$project$DocumentId$CoreDoc)
+			]));
+};
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
 	});
-var $elm$http$Http$maybeSend = F4(
-	function (router, desiredTracker, progress, _v0) {
-		var actualTracker = _v0.a;
-		var toMsg = _v0.b;
-		return _Utils_eq(desiredTracker, actualTracker) ? $elm$core$Maybe$Just(
-			A2(
-				$elm$core$Platform$sendToApp,
-				router,
-				toMsg(progress))) : $elm$core$Maybe$Nothing;
-	});
-var $elm$http$Http$onSelfMsg = F3(
-	function (router, _v0, state) {
-		var tracker = _v0.a;
-		var progress = _v0.b;
-		return A2(
-			$elm$core$Task$andThen,
-			function (_v1) {
-				return $elm$core$Task$succeed(state);
-			},
-			$elm$core$Task$sequence(
+var $elm$core$Task$onError = _Scheduler_onError;
+var $elm$core$Task$attempt = F2(
+	function (resultToMessage, task) {
+		return $elm$core$Task$command(
+			$elm$core$Task$Perform(
 				A2(
-					$elm$core$List$filterMap,
-					A3($elm$http$Http$maybeSend, router, tracker, progress),
-					state.subs)));
+					$elm$core$Task$onError,
+					A2(
+						$elm$core$Basics$composeL,
+						A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+						$elm$core$Result$Err),
+					A2(
+						$elm$core$Task$andThen,
+						A2(
+							$elm$core$Basics$composeL,
+							A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+							$elm$core$Result$Ok),
+						task))));
 	});
-var $elm$http$Http$Cancel = function (a) {
-	return {$: 'Cancel', a: a};
-};
-var $elm$http$Http$cmdMap = F2(
-	function (func, cmd) {
-		if (cmd.$ === 'Cancel') {
-			var tracker = cmd.a;
-			return $elm$http$Http$Cancel(tracker);
-		} else {
-			var r = cmd.a;
-			return $elm$http$Http$Request(
-				{
-					allowCookiesFromOtherDomains: r.allowCookiesFromOtherDomains,
-					body: r.body,
-					expect: A2(_Http_mapExpect, func, r.expect),
-					headers: r.headers,
-					method: r.method,
-					timeout: r.timeout,
-					tracker: r.tracker,
-					url: r.url
-				});
-		}
-	});
-var $elm$http$Http$MySub = F2(
-	function (a, b) {
-		return {$: 'MySub', a: a, b: b};
-	});
-var $elm$http$Http$subMap = F2(
-	function (func, _v0) {
-		var tracker = _v0.a;
-		var toMsg = _v0.b;
-		return A2(
-			$elm$http$Http$MySub,
-			tracker,
-			A2($elm$core$Basics$composeR, toMsg, func));
-	});
-_Platform_effectManagers['Http'] = _Platform_createManager($elm$http$Http$init, $elm$http$Http$onEffects, $elm$http$Http$onSelfMsg, $elm$http$Http$cmdMap, $elm$http$Http$subMap);
-var $elm$http$Http$command = _Platform_leaf('Http');
-var $elm$http$Http$subscription = _Platform_leaf('Http');
-var $elm$http$Http$request = function (r) {
-	return $elm$http$Http$command(
-		$elm$http$Http$Request(
-			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
-};
-var $elm$http$Http$get = function (r) {
-	return $elm$http$Http$request(
-		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
-};
-var $author$project$Main$loadReferenceModel = function (lang) {
-	return $elm$http$Http$get(
-		{
-			expect: $elm$http$Http$expectString(
-				$author$project$Main$OnGetText('en/core-vocabulary.txt')),
-			url: A2(
-				$elm$core$String$join,
-				'/',
-				_List_fromArray(
-					['data', lang, 'core-vocabulary.txt']))
-		});
-};
 var $author$project$Morpheme$createDefault = {rules: _List_Nil};
 var $author$project$ReferenceModel$createDefault = {altDescription: $elm$core$Dict$empty, attribution: $elm$core$Dict$empty, classicLanguage: 'en', description: $elm$core$Dict$empty, mediaContent: $elm$core$Dict$empty, morphemeLaw: $author$project$Morpheme$createDefault, reverseTranslation: $elm$core$Dict$empty, reverseWordInfo: $elm$core$Dict$empty, translation: $elm$core$Dict$empty, wordInfo: $elm$core$Dict$empty};
-var $author$project$Applicative$reset = {aboutWord: $elm$core$Maybe$Nothing, content: '', isClassicLanguage: true, refModel: $author$project$ReferenceModel$createDefault, warnings: _List_Nil};
+var $author$project$Applicative$reset = {aboutWord: $elm$core$Maybe$Nothing, content: '', isClassicLanguage: true, refModel: $author$project$ReferenceModel$createDefault, warnings: _List_Nil, wordInfoList: _List_Nil};
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		$author$project$Applicative$reset,
-		$author$project$Main$loadReferenceModel('en'));
+		A2(
+			$elm$core$Task$attempt,
+			$author$project$Main$OnGotTasksBack,
+			$author$project$Main$allTasks('en')));
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
+};
+var $author$project$WordType$IncorrectWord = {$: 'IncorrectWord'};
+var $author$project$WordType$UnkwnownWord = {$: 'UnkwnownWord'};
+var $elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
+			}
+		}
+	});
+var $elm$core$List$member = F2(
+	function (x, xs) {
+		return A2(
+			$elm$core$List$any,
+			function (a) {
+				return _Utils_eq(a, x);
+			},
+			xs);
+	});
+var $author$project$WordComposition$isCompoundFictionalChar = function (ch) {
+	return A2(
+		$elm$core$List$member,
+		ch,
+		_List_fromArray(
+			[
+				_Utils_chr('┼'),
+				_Utils_chr('╀'),
+				_Utils_chr('┾'),
+				_Utils_chr('╄'),
+				_Utils_chr('╁'),
+				_Utils_chr('╂'),
+				_Utils_chr('╆'),
+				_Utils_chr('╊'),
+				_Utils_chr('┽'),
+				_Utils_chr('┹'),
+				_Utils_chr('┿'),
+				_Utils_chr('╇'),
+				_Utils_chr('┄')
+			]));
+};
+var $author$project$WordComposition$matchCompoundFictionalWord = function (str) {
+	return A2($elm$core$String$all, $author$project$WordComposition$isCompoundFictionalChar, str);
+};
+var $author$project$WordInfo$createUnexpectedWord = function (fictionalWord) {
+	return {
+		altDescription: $elm$core$Maybe$Nothing,
+		description: $elm$core$Maybe$Nothing,
+		fictionalWord: fictionalWord,
+		mediaContents: _List_Nil,
+		origin: $elm$core$Maybe$Nothing,
+		phonetic: '',
+		translations: _List_Nil,
+		wordType: $author$project$WordComposition$matchCompoundFictionalWord(fictionalWord) ? $author$project$WordType$UnkwnownWord : $author$project$WordType$IncorrectWord
+	};
+};
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $author$project$ReferenceModel$getWordInfoByClassic = F2(
+	function (refModel, classicWord) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$WordInfo$createUnexpectedWord(classicWord),
+			A2($elm$core$Dict$get, classicWord, refModel.reverseWordInfo));
+	});
+var $author$project$Phrasing$classicSeps = _List_fromArray(
+	[
+		_Utils_chr(' '),
+		_Utils_chr(','),
+		_Utils_chr(';'),
+		_Utils_chr('.'),
+		_Utils_chr('\n')
+	]);
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Phrasing$containsClassicSep = function (acc) {
+	return A2(
+		$elm$core$List$member,
+		A2(
+			$elm$core$Maybe$withDefault,
+			_Utils_chr('A'),
+			$elm$core$List$head(acc.chars)),
+		$author$project$Phrasing$classicSeps);
+};
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$core$List$singleton = function (value) {
+	return _List_fromArray(
+		[value]);
+};
+var $author$project$Phrasing$checkClassicChar = F2(
+	function (ch, acc) {
+		var _v0 = _List_fromArray(
+			[
+				$elm$core$List$isEmpty(acc.chars),
+				$author$project$Phrasing$containsClassicSep(acc),
+				A2($elm$core$List$member, ch, $author$project$Phrasing$classicSeps)
+			]);
+		_v0$5:
+		while (true) {
+			if (_v0.b) {
+				if (_v0.a) {
+					if ((_v0.b.b && _v0.b.b.b) && (!_v0.b.b.b.b)) {
+						var _v1 = _v0.b;
+						var a = _v1.a;
+						var _v2 = _v1.b;
+						var b = _v2.a;
+						return _Utils_update(
+							acc,
+							{
+								chars: $elm$core$List$singleton(ch)
+							});
+					} else {
+						break _v0$5;
+					}
+				} else {
+					if (_v0.b.b) {
+						if (_v0.b.a) {
+							if (_v0.b.b.b) {
+								if (_v0.b.b.a) {
+									if (!_v0.b.b.b.b) {
+										var _v3 = _v0.b;
+										var _v4 = _v3.b;
+										return _Utils_update(
+											acc,
+											{
+												chars: A2($elm$core$List$cons, ch, acc.chars)
+											});
+									} else {
+										break _v0$5;
+									}
+								} else {
+									if (!_v0.b.b.b.b) {
+										var _v5 = _v0.b;
+										var _v6 = _v5.b;
+										return _Utils_update(
+											acc,
+											{
+												chars: $elm$core$List$singleton(ch),
+												words: A2($elm$core$List$cons, acc.chars, acc.words)
+											});
+									} else {
+										break _v0$5;
+									}
+								}
+							} else {
+								break _v0$5;
+							}
+						} else {
+							if (_v0.b.b.b) {
+								if (!_v0.b.b.a) {
+									if (!_v0.b.b.b.b) {
+										var _v7 = _v0.b;
+										var _v8 = _v7.b;
+										return _Utils_update(
+											acc,
+											{
+												chars: A2($elm$core$List$cons, ch, acc.chars)
+											});
+									} else {
+										break _v0$5;
+									}
+								} else {
+									if (!_v0.b.b.b.b) {
+										var _v9 = _v0.b;
+										var _v10 = _v9.b;
+										return _Utils_update(
+											acc,
+											{
+												chars: $elm$core$List$singleton(ch),
+												words: A2($elm$core$List$cons, acc.chars, acc.words)
+											});
+									} else {
+										break _v0$5;
+									}
+								}
+							} else {
+								break _v0$5;
+							}
+						}
+					} else {
+						break _v0$5;
+					}
+				}
+			} else {
+				break _v0$5;
+			}
+		}
+		return acc;
+	});
+var $elm$core$String$foldr = _String_foldr;
+var $elm$core$String$toList = function (string) {
+	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
+};
+var $elm$core$String$fromList = _String_fromList;
+var $author$project$Phrasing$toStringList = function (acc) {
+	return $elm$core$List$isEmpty(acc.chars) ? A2($elm$core$List$map, $elm$core$String$fromList, acc.words) : A2(
+		$elm$core$List$map,
+		$elm$core$String$fromList,
+		A2($elm$core$List$cons, acc.chars, acc.words));
+};
+var $author$project$Phrasing$splitClassicIntoWords = function (str) {
+	return $author$project$Phrasing$toStringList(
+		A3(
+			$elm$core$List$foldr,
+			$author$project$Phrasing$checkClassicChar,
+			{chars: _List_Nil, words: _List_Nil},
+			$elm$core$String$toList(str)));
+};
+var $author$project$Phrasing$fromClassicString = F2(
+	function (refModel, str) {
+		return A2(
+			$elm$core$List$map,
+			$author$project$ReferenceModel$getWordInfoByClassic(refModel),
+			$author$project$Phrasing$splitClassicIntoWords(str));
+	});
+var $author$project$Applicative$changeClassicContent = F2(
+	function (newcontent, model) {
+		return _Utils_update(
+			model,
+			{
+				content: newcontent,
+				wordInfoList: A2($author$project$Phrasing$fromClassicString, model.refModel, newcontent)
+			});
+	});
+var $author$project$ReferenceModel$getWordInfoByDict = F2(
+	function (dictWordInfo, fictionalWord) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$WordInfo$createUnexpectedWord(fictionalWord),
+			A2($elm$core$Dict$get, fictionalWord, dictWordInfo));
+	});
+var $author$project$ReferenceModel$getWordInfo = F2(
+	function (refModel, fictionalWord) {
+		return A2($author$project$ReferenceModel$getWordInfoByDict, refModel.wordInfo, fictionalWord);
+	});
+var $author$project$Phrasing$fictSep = _Utils_chr('◌');
+var $author$project$Phrasing$containsFictionalSep = function (acc) {
+	return A2($elm$core$List$member, $author$project$Phrasing$fictSep, acc.chars);
+};
+var $author$project$Phrasing$checkFictionalChar = F2(
+	function (ch, acc) {
+		var _v0 = _List_fromArray(
+			[
+				$elm$core$List$isEmpty(acc.chars),
+				$author$project$Phrasing$containsFictionalSep(acc),
+				_Utils_eq(ch, $author$project$Phrasing$fictSep)
+			]);
+		_v0$5:
+		while (true) {
+			if (_v0.b) {
+				if (_v0.a) {
+					if ((_v0.b.b && _v0.b.b.b) && (!_v0.b.b.b.b)) {
+						var _v1 = _v0.b;
+						var a = _v1.a;
+						var _v2 = _v1.b;
+						var b = _v2.a;
+						return _Utils_update(
+							acc,
+							{
+								chars: $elm$core$List$singleton(ch)
+							});
+					} else {
+						break _v0$5;
+					}
+				} else {
+					if (_v0.b.b) {
+						if (_v0.b.a) {
+							if (_v0.b.b.b) {
+								if (_v0.b.b.a) {
+									if (!_v0.b.b.b.b) {
+										var _v3 = _v0.b;
+										var _v4 = _v3.b;
+										return _Utils_update(
+											acc,
+											{
+												chars: A2($elm$core$List$cons, ch, acc.chars)
+											});
+									} else {
+										break _v0$5;
+									}
+								} else {
+									if (!_v0.b.b.b.b) {
+										var _v5 = _v0.b;
+										var _v6 = _v5.b;
+										return _Utils_update(
+											acc,
+											{
+												chars: $elm$core$List$singleton(ch),
+												words: A2($elm$core$List$cons, acc.chars, acc.words)
+											});
+									} else {
+										break _v0$5;
+									}
+								}
+							} else {
+								break _v0$5;
+							}
+						} else {
+							if (_v0.b.b.b) {
+								if (!_v0.b.b.a) {
+									if (!_v0.b.b.b.b) {
+										var _v7 = _v0.b;
+										var _v8 = _v7.b;
+										return _Utils_update(
+											acc,
+											{
+												chars: A2($elm$core$List$cons, ch, acc.chars)
+											});
+									} else {
+										break _v0$5;
+									}
+								} else {
+									if (!_v0.b.b.b.b) {
+										var _v9 = _v0.b;
+										var _v10 = _v9.b;
+										return _Utils_update(
+											acc,
+											{
+												chars: $elm$core$List$singleton(ch),
+												words: A2($elm$core$List$cons, acc.chars, acc.words)
+											});
+									} else {
+										break _v0$5;
+									}
+								}
+							} else {
+								break _v0$5;
+							}
+						}
+					} else {
+						break _v0$5;
+					}
+				}
+			} else {
+				break _v0$5;
+			}
+		}
+		return acc;
+	});
+var $author$project$Phrasing$splitFictionalIntoWords = function (str) {
+	return $author$project$Phrasing$toStringList(
+		A3(
+			$elm$core$List$foldr,
+			$author$project$Phrasing$checkFictionalChar,
+			{chars: _List_Nil, words: _List_Nil},
+			$elm$core$String$toList(str)));
+};
+var $author$project$Phrasing$fromFictionalString = F2(
+	function (refModel, str) {
+		return A2(
+			$elm$core$List$map,
+			$author$project$ReferenceModel$getWordInfo(refModel),
+			$author$project$Phrasing$splitFictionalIntoWords(str));
+	});
+var $author$project$Applicative$changeFictionalContent = F2(
+	function (newcontent, model) {
+		return _Utils_update(
+			model,
+			{
+				content: newcontent,
+				wordInfoList: A2($author$project$Phrasing$fromFictionalString, model.refModel, newcontent)
+			});
+	});
+var $author$project$Applicative$changeContent = F2(
+	function (newcontent, model) {
+		return model.isClassicLanguage ? A2($author$project$Applicative$changeClassicContent, newcontent, model) : A2($author$project$Applicative$changeFictionalContent, newcontent, model);
+	});
+var $elm$core$Basics$not = _Basics_not;
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var $author$project$Phrasing$toClassicString = F2(
+	function (refModel, list) {
+		return A2(
+			$elm$core$String$join,
+			'',
+			A2(
+				$elm$core$List$map,
+				A2(
+					$elm$core$Basics$composeR,
+					function ($) {
+						return $.translations;
+					},
+					A2(
+						$elm$core$Basics$composeR,
+						$elm$core$List$head,
+						$elm$core$Maybe$withDefault('?'))),
+				list));
+	});
+var $author$project$Phrasing$toFictionalString = F2(
+	function (refModel, list) {
+		return A2(
+			$elm$core$String$join,
+			'',
+			A2(
+				$elm$core$List$map,
+				function ($) {
+					return $.fictionalWord;
+				},
+				list));
+	});
+var $author$project$Applicative$toContent = F3(
+	function (isClassic, refModel, list) {
+		return isClassic ? A2($author$project$Phrasing$toClassicString, refModel, list) : A2($author$project$Phrasing$toFictionalString, refModel, list);
+	});
+var $author$project$Applicative$flipTranslation = function (model) {
+	return _Utils_update(
+		model,
+		{
+			content: A3($author$project$Applicative$toContent, !model.isClassicLanguage, model.refModel, model.wordInfoList),
+			isClassicLanguage: !model.isClassicLanguage
+		});
 };
 var $author$project$Applicative$asReferenceModelIn = F2(
 	function (model, refModel) {
@@ -6160,6 +6487,17 @@ var $elm$core$Result$map = F2(
 		} else {
 			var e = ra.a;
 			return $elm$core$Result$Err(e);
+		}
+	});
+var $elm$core$Result$mapError = F2(
+	function (f, result) {
+		if (result.$ === 'Ok') {
+			var v = result.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			var e = result.a;
+			return $elm$core$Result$Err(
+				f(e));
 		}
 	});
 var $elm$core$Dict$fromList = function (assocs) {
@@ -6247,6 +6585,24 @@ var $elm$core$List$filter = F2(
 			_List_Nil,
 			list);
 	});
+var $elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _v0 = f(mx);
+		if (_v0.$ === 'Just') {
+			var x = _v0.a;
+			return A2($elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var $elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			$elm$core$List$foldr,
+			$elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
 var $elm$core$Result$andThen = F2(
 	function (callback, result) {
 		if (result.$ === 'Ok') {
@@ -6309,13 +6665,6 @@ var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;
 };
-var $elm$core$List$isEmpty = function (xs) {
-	if (!xs.b) {
-		return true;
-	} else {
-		return false;
-	}
-};
 var $author$project$Base12Meta$isErr = function (result) {
 	if (result.$ === 'Ok') {
 		return false;
@@ -6365,7 +6714,6 @@ var $author$project$Base12Meta$padWithNothing = function (list) {
 			12 - $elm$core$List$length(list),
 			$elm$core$Maybe$Nothing));
 };
-var $elm$core$Basics$not = _Basics_not;
 var $author$project$InfoMeta$checkName = function (str) {
 	return (!$elm$core$String$isEmpty(str)) && A2($elm$core$String$all, $elm$core$Char$isAlphaNum, str);
 };
@@ -6559,15 +6907,6 @@ var $elm$core$Maybe$map = F2(
 				f(value));
 		} else {
 			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
 		}
 	});
 var $author$project$InfoMeta$checkConstant = function (infoMeta) {
@@ -6875,23 +7214,6 @@ var $author$project$VocabularyTranslation$fromString = function (csv) {
 		$author$project$VocabularyTranslation$csvToTuple,
 		$elm$core$String$lines(csv));
 };
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $author$project$Applicative$getUrlEnd = function (relUrl) {
-	return A2(
-		$elm$core$Maybe$withDefault,
-		'',
-		$elm$core$List$head(
-			$elm$core$List$reverse(
-				A2($elm$core$String$split, '/', relUrl))));
-};
 var $author$project$VocabularyTranslation$filterByFirst = F2(
 	function (list, predicate) {
 		return A2(
@@ -7050,11 +7372,11 @@ var $author$project$ReferenceModel$setMorphemeLaw = F2(
 			model,
 			{morphemeLaw: morphemeLaw});
 	});
-var $author$project$Applicative$loadAny = F3(
-	function (relUrl, textpayload, model) {
-		var _v0 = $author$project$Applicative$getUrlEnd(relUrl);
-		switch (_v0) {
-			case 'attribution.json':
+var $author$project$Applicative$loadSomeAsset = F2(
+	function (taskDoc, model) {
+		var _v0 = taskDoc.a;
+		switch (_v0.$) {
+			case 'AttributionDoc':
 				return A2(
 					$author$project$Applicative$asReferenceModelIn,
 					model,
@@ -7063,9 +7385,9 @@ var $author$project$Applicative$loadAny = F3(
 						A2(
 							$elm$core$Result$withDefault,
 							$elm$core$Dict$empty,
-							$author$project$Attribution$fromString(textpayload)),
+							$author$project$Attribution$fromString(taskDoc.b)),
 						model.refModel));
-			case 'core-vocabulary-description.json':
+			case 'DescriptionDoc':
 				return A2(
 					$author$project$Applicative$asReferenceModelIn,
 					model,
@@ -7074,9 +7396,9 @@ var $author$project$Applicative$loadAny = F3(
 						A2(
 							$elm$core$Result$withDefault,
 							$elm$core$Dict$empty,
-							$author$project$VocabularyDescription$fromString(textpayload)),
+							$author$project$VocabularyDescription$fromString(taskDoc.b)),
 						model.refModel));
-			case 'core-vocabulary-media.json':
+			case 'MediaDoc':
 				return A2(
 					$author$project$Applicative$asReferenceModelIn,
 					model,
@@ -7085,17 +7407,17 @@ var $author$project$Applicative$loadAny = F3(
 						A2(
 							$elm$core$Result$withDefault,
 							$elm$core$Dict$empty,
-							$author$project$MediaContent$fromString(textpayload)),
+							$author$project$MediaContent$fromString(taskDoc.b)),
 						model.refModel));
-			case 'core-vocabulary-translation.csv':
+			case 'TranslationDoc':
 				return A2(
 					$author$project$Applicative$asReferenceModelIn,
 					model,
 					A2(
 						$author$project$ReferenceModel$loadTranslation,
-						$author$project$VocabularyTranslation$fromString(textpayload),
+						$author$project$VocabularyTranslation$fromString(taskDoc.b),
 						model.refModel));
-			case 'core-vocabulary.txt':
+			default:
 				return A2(
 					$author$project$Applicative$asReferenceModelIn,
 					model,
@@ -7104,27 +7426,487 @@ var $author$project$Applicative$loadAny = F3(
 						A2(
 							$elm$core$Result$withDefault,
 							$author$project$Morpheme$createDefault,
-							$author$project$Morpheme$fromString(textpayload)),
+							$author$project$Morpheme$fromString(taskDoc.b)),
 						model.refModel));
-			default:
-				return model;
 		}
+	});
+var $author$project$Applicative$loadAny = F2(
+	function (taskDocList, model) {
+		if (!taskDocList.b) {
+			return model;
+		} else {
+			if (!taskDocList.b.b) {
+				var docIdContent = taskDocList.a;
+				return A2($author$project$Applicative$loadSomeAsset, docIdContent, model);
+			} else {
+				var docIdContent = taskDocList.a;
+				var more = taskDocList.b;
+				return A2(
+					$author$project$Applicative$loadAny,
+					more,
+					A2($author$project$Applicative$loadSomeAsset, docIdContent, model));
+			}
+		}
+	});
+var $author$project$Morpheme$allVocabStack = {
+	nextInfoMeta: {
+		name: 'All',
+		ref: $elm$core$Maybe$Just('?all')
+	},
+	origin: _List_Nil,
+	stacks: _List_Nil
+};
+var $author$project$Base12$Eight = {$: 'Eight'};
+var $author$project$Base12$Eleven = {$: 'Eleven'};
+var $author$project$Base12$Five = {$: 'Five'};
+var $author$project$Base12$Four = {$: 'Four'};
+var $author$project$Base12$Nine = {$: 'Nine'};
+var $author$project$Base12$One = {$: 'One'};
+var $author$project$Base12$Seven = {$: 'Seven'};
+var $author$project$Base12$Six = {$: 'Six'};
+var $author$project$Base12$Ten = {$: 'Ten'};
+var $author$project$Base12$Three = {$: 'Three'};
+var $author$project$Base12$Two = {$: 'Two'};
+var $author$project$Base12$UnknownBase12 = {$: 'UnknownBase12'};
+var $author$project$Base12$Zero = {$: 'Zero'};
+var $author$project$Base12$fromDroidChar = function (value) {
+	switch (value.valueOf()) {
+		case '┼':
+			return $author$project$Base12$Zero;
+		case '╀':
+			return $author$project$Base12$One;
+		case '┾':
+			return $author$project$Base12$Two;
+		case '╄':
+			return $author$project$Base12$Three;
+		case '╁':
+			return $author$project$Base12$Four;
+		case '╂':
+			return $author$project$Base12$Five;
+		case '╆':
+			return $author$project$Base12$Six;
+		case '╊':
+			return $author$project$Base12$Seven;
+		case '┽':
+			return $author$project$Base12$Eight;
+		case '╃':
+			return $author$project$Base12$Nine;
+		case '┿':
+			return $author$project$Base12$Ten;
+		case '╇':
+			return $author$project$Base12$Eleven;
+		default:
+			return $author$project$Base12$UnknownBase12;
+	}
+};
+var $author$project$Base12$fromString = function (str) {
+	return A2(
+		$elm$core$List$map,
+		$author$project$Base12$fromDroidChar,
+		$elm$core$String$toList(str));
+};
+var $author$project$Morpheme$pushSequence = F2(
+	function (law, vocabStack) {
+		var toadd = A2(
+			$elm$core$List$filterMap,
+			$elm$core$Basics$identity,
+			$author$project$Base12Meta$toArray(
+				A2(
+					$elm$core$Maybe$withDefault,
+					$author$project$Base12Meta$reset,
+					$elm$core$List$head(
+						A2(
+							$elm$core$List$filter,
+							function (rule) {
+								return _Utils_eq(
+									rule.name,
+									A2($elm$core$Maybe$withDefault, 'should-not-happen', vocabStack.nextInfoMeta.ref));
+							},
+							law.rules)))));
+		return _Utils_update(
+			vocabStack,
+			{
+				nextInfoMeta: {name: 'WaitingForNext', ref: $elm$core$Maybe$Nothing},
+				stacks: _Utils_ap(toadd, vocabStack.stacks)
+			});
+	});
+var $author$project$Morpheme$addVocabOrigin = F2(
+	function (originpart, vocabStack) {
+		return _Utils_update(
+			vocabStack,
+			{
+				origin: _Utils_ap(
+					vocabStack.origin,
+					_List_fromArray(
+						[originpart]))
+			});
+	});
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$Base12Meta$getInfoMeta = F2(
+	function (meta, id) {
+		switch (id.$) {
+			case 'Zero':
+				return meta.zero;
+			case 'One':
+				return meta.one;
+			case 'Two':
+				return meta.two;
+			case 'Three':
+				return meta.three;
+			case 'Four':
+				return meta.four;
+			case 'Five':
+				return meta.five;
+			case 'Six':
+				return meta.six;
+			case 'Seven':
+				return meta.seven;
+			case 'Eight':
+				return meta.eight;
+			case 'Nine':
+				return meta.nine;
+			case 'Ten':
+				return meta.ten;
+			case 'Eleven':
+				return meta.eleven;
+			default:
+				return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$Morpheme$findInfoMeta = F3(
+	function (law, previousInfoMeta, base12) {
+		return A2(
+			$elm$core$Maybe$andThen,
+			function (refname) {
+				return A2(
+					$elm$core$Maybe$andThen,
+					function (base12Meta) {
+						return A2($author$project$Base12Meta$getInfoMeta, base12Meta, base12);
+					},
+					$elm$core$List$head(
+						A2(
+							$elm$core$List$filter,
+							function (rule) {
+								return _Utils_eq(rule.name, refname);
+							},
+							law.rules)));
+			},
+			previousInfoMeta.ref);
+	});
+var $author$project$Morpheme$recurseEnum = F3(
+	function (law, nextBase12, vocabStack) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			vocabStack,
+			A2(
+				$elm$core$Maybe$map,
+				function (infoMeta) {
+					return A2(
+						$author$project$Morpheme$addVocabOrigin,
+						infoMeta.name,
+						_Utils_update(
+							vocabStack,
+							{nextInfoMeta: infoMeta}));
+				},
+				A3($author$project$Morpheme$findInfoMeta, law, vocabStack.nextInfoMeta, nextBase12)));
+	});
+var $author$project$Morpheme$recurseSwitch = F3(
+	function (law, nextBase12, vocabStack) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			vocabStack,
+			A2(
+				$elm$core$Maybe$map,
+				function (infoMeta) {
+					return A2(
+						$author$project$Morpheme$addVocabOrigin,
+						infoMeta.name,
+						_Utils_update(
+							vocabStack,
+							{nextInfoMeta: infoMeta}));
+				},
+				A3($author$project$Morpheme$findInfoMeta, law, vocabStack.nextInfoMeta, nextBase12)));
+	});
+var $elm$core$List$tail = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(xs);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Morpheme$recurseOrigin = F3(
+	function (law, nextBase12, vocabStack) {
+		var _v0 = vocabStack.nextInfoMeta.ref;
+		if (_v0.$ === 'Just') {
+			var nextKey = _v0.a;
+			var _v1 = A2($elm$core$String$left, 1, nextKey);
+			switch (_v1) {
+				case '?':
+					return A3($author$project$Morpheme$recurseSwitch, law, nextBase12, vocabStack);
+				case '$':
+					return A3($author$project$Morpheme$recurseEnum, law, nextBase12, vocabStack);
+				case '@':
+					return A3(
+						$author$project$Morpheme$recurseOrigin,
+						law,
+						nextBase12,
+						A2($author$project$Morpheme$pushSequence, law, vocabStack));
+				default:
+					return vocabStack;
+			}
+		} else {
+			return $elm$core$List$isEmpty(vocabStack.stacks) ? vocabStack : A3(
+				$author$project$Morpheme$recurseOrigin,
+				law,
+				nextBase12,
+				_Utils_update(
+					vocabStack,
+					{
+						nextInfoMeta: A2(
+							$elm$core$Maybe$withDefault,
+							{name: 'AllDoneNow', ref: $elm$core$Maybe$Nothing},
+							$elm$core$List$head(vocabStack.stacks)),
+						stacks: A2(
+							$elm$core$Maybe$withDefault,
+							_List_Nil,
+							$elm$core$List$tail(vocabStack.stacks))
+					}));
+		}
+	});
+var $author$project$Morpheme$checkOrigin = F2(
+	function (law, str) {
+		return A2(
+			$elm$core$String$join,
+			' ',
+			A3(
+				$elm$core$List$foldl,
+				$author$project$Morpheme$recurseOrigin(law),
+				$author$project$Morpheme$allVocabStack,
+				$author$project$Base12$fromString(str)).origin);
+	});
+var $author$project$WordType$ClauseSeparator = {$: 'ClauseSeparator'};
+var $author$project$WordType$ParagraphSeparator = {$: 'ParagraphSeparator'};
+var $author$project$WordType$SentenceClauseSeparator = {$: 'SentenceClauseSeparator'};
+var $author$project$WordType$SentenceSeparator = {$: 'SentenceSeparator'};
+var $author$project$WordType$WordSeparator = {$: 'WordSeparator'};
+var $author$project$WordType$AdjectiveType = {$: 'AdjectiveType'};
+var $author$project$WordType$AdverbType = {$: 'AdverbType'};
+var $author$project$WordType$ConjunctionType = {$: 'ConjunctionType'};
+var $author$project$WordType$DeterminerType = {$: 'DeterminerType'};
+var $author$project$WordType$NounType = {$: 'NounType'};
+var $author$project$WordType$PrepositionType = {$: 'PrepositionType'};
+var $author$project$WordType$PronounType = {$: 'PronounType'};
+var $author$project$WordType$VerbType = {$: 'VerbType'};
+var $author$project$Morpheme$checkExistingWordType = function (str) {
+	var _v0 = A2(
+		$elm$core$Maybe$withDefault,
+		$author$project$Base12$UnknownBase12,
+		$elm$core$List$head(
+			$author$project$Base12$fromString(str)));
+	switch (_v0.$) {
+		case 'Zero':
+			return $author$project$WordType$NounType;
+		case 'One':
+			return $author$project$WordType$VerbType;
+		case 'Two':
+			return $author$project$WordType$AdjectiveType;
+		case 'Three':
+			return $author$project$WordType$AdverbType;
+		case 'Four':
+			return $author$project$WordType$PronounType;
+		case 'Five':
+			return $author$project$WordType$PrepositionType;
+		case 'Six':
+			return $author$project$WordType$ConjunctionType;
+		case 'Seven':
+			return $author$project$WordType$DeterminerType;
+		default:
+			return $author$project$WordType$IncorrectWord;
+	}
+};
+var $author$project$Morpheme$checkWordType = function (str) {
+	switch (str) {
+		case '◌':
+			return $author$project$WordType$WordSeparator;
+		case '◌◌':
+			return $author$project$WordType$ClauseSeparator;
+		case '◌◌◌':
+			return $author$project$WordType$SentenceClauseSeparator;
+		case '◌◌◌◌':
+			return $author$project$WordType$SentenceSeparator;
+		case '◌◌◌◌◌':
+			return $author$project$WordType$ParagraphSeparator;
+		default:
+			var shouldbeword = str;
+			return $author$project$Morpheme$checkExistingWordType(shouldbeword);
+	}
+};
+var $author$project$Base12$toDroidCons = function (value) {
+	switch (value.$) {
+		case 'Zero':
+			return 'p';
+		case 'One':
+			return 't';
+		case 'Two':
+			return 'k';
+		case 'Three':
+			return 'm';
+		case 'Four':
+			return 'n';
+		case 'Five':
+			return 'd';
+		case 'Six':
+			return 'b';
+		case 'Seven':
+			return 'g';
+		case 'Eight':
+			return 'w';
+		case 'Nine':
+			return 'j';
+		case 'Ten':
+			return 'sɑː';
+		case 'Eleven':
+			return 'goʊ';
+		default:
+			return '?';
+	}
+};
+var $author$project$Base12$toDroidVowels = function (value) {
+	switch (value.$) {
+		case 'Zero':
+			return 'ɑː';
+		case 'One':
+			return 'ɛ';
+		case 'Two':
+			return 'iː';
+		case 'Three':
+			return 'oʊ';
+		case 'Four':
+			return 'ʊ';
+		case 'Five':
+			return 'aɪ';
+		case 'Six':
+			return 'eɪ';
+		case 'Seven':
+			return 'ɪʃ';
+		case 'Eight':
+			return 'ɔɪ';
+		case 'Nine':
+			return 'juː';
+		case 'Ten':
+			return 'sɑː';
+		case 'Eleven':
+			return 'goʊ';
+		default:
+			return '?';
+	}
+};
+var $author$project$Base12$toDroidPhonetic = function (values) {
+	if (!values.b) {
+		return '';
+	} else {
+		if (!values.b.b) {
+			var a = values.a;
+			return $author$project$Base12$toDroidCons(a);
+		} else {
+			var a = values.a;
+			var _v1 = values.b;
+			var b = _v1.a;
+			var rest = _v1.b;
+			return _Utils_ap(
+				$author$project$Base12$toDroidCons(a),
+				_Utils_ap(
+					$author$project$Base12$toDroidVowels(b),
+					$author$project$Base12$toDroidPhonetic(rest)));
+		}
+	}
+};
+var $author$project$ReferenceModel$deduceWordInfo = F2(
+	function (refModel, fictWord) {
+		return _Utils_Tuple2(
+			fictWord,
+			{
+				altDescription: A2($elm$core$Dict$get, fictWord, refModel.altDescription),
+				description: A2($elm$core$Dict$get, fictWord, refModel.description),
+				fictionalWord: fictWord,
+				mediaContents: A2(
+					$elm$core$Maybe$withDefault,
+					_List_Nil,
+					A2($elm$core$Dict$get, fictWord, refModel.mediaContent)),
+				origin: $elm$core$Maybe$Just(
+					A2($author$project$Morpheme$checkOrigin, refModel.morphemeLaw, fictWord)),
+				phonetic: $author$project$Base12$toDroidPhonetic(
+					$author$project$Base12$fromString(fictWord)),
+				translations: A2(
+					$elm$core$Maybe$withDefault,
+					_List_Nil,
+					A2($elm$core$Dict$get, fictWord, refModel.translation)),
+				wordType: $author$project$Morpheme$checkWordType(fictWord)
+			});
+	});
+var $elm$core$Tuple$mapSecond = F2(
+	function (func, _v0) {
+		var x = _v0.a;
+		var y = _v0.b;
+		return _Utils_Tuple2(
+			x,
+			func(y));
+	});
+var $author$project$ReferenceModel$loadWordInfo = function (refModel) {
+	var wordInfo = $elm$core$Dict$fromList(
+		A2(
+			$elm$core$List$map,
+			$author$project$ReferenceModel$deduceWordInfo(refModel),
+			A2(
+				$elm$core$List$map,
+				$elm$core$Tuple$first,
+				$elm$core$Dict$toList(refModel.translation))));
+	var reverseWordInfo = A2(
+		$elm$core$List$map,
+		$elm$core$Tuple$mapSecond(
+			function (fict) {
+				return A2(
+					$author$project$ReferenceModel$getWordInfoByDict,
+					wordInfo,
+					A2(
+						$elm$core$Maybe$withDefault,
+						'?',
+						$elm$core$List$head(fict)));
+			}),
+		$elm$core$Dict$toList(refModel.reverseTranslation));
+	return _Utils_update(
+		refModel,
+		{
+			reverseWordInfo: $elm$core$Dict$fromList(reverseWordInfo),
+			wordInfo: wordInfo
+		});
+};
+var $author$project$Applicative$load = F2(
+	function (taskDocList, model) {
+		var newmodel = A2($author$project$Applicative$loadAny, taskDocList, model);
+		return A2(
+			$author$project$Applicative$asReferenceModelIn,
+			newmodel,
+			$author$project$ReferenceModel$loadWordInfo(newmodel.refModel));
 	});
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'OnChangeLanguage':
-				var lang = msg.a;
-				return _Utils_Tuple2(
-					model,
-					$author$project$Main$loadReferenceModel(lang));
 			case 'OnFlipTranslationDir':
 				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{isClassicLanguage: !model.isClassicLanguage}),
+					$author$project$Applicative$flipTranslation(model),
 					$elm$core$Platform$Cmd$none);
 			case 'OnGetWordInfo':
 				var aboutWord = msg.a;
@@ -7135,30 +7917,32 @@ var $author$project$Main$update = F2(
 							aboutWord: $elm$core$Maybe$Just(aboutWord)
 						}),
 					$elm$core$Platform$Cmd$none);
+			case 'OnChangeContent':
+				var content = msg.a;
+				return _Utils_Tuple2(
+					A2($author$project$Applicative$changeContent, content, model),
+					$elm$core$Platform$Cmd$none);
 			default:
-				var relUrl = msg.a;
-				var result = msg.b;
+				var result = msg.a;
 				if (result.$ === 'Ok') {
-					var fullText = result.a;
+					var taskDocs = result.a;
 					return _Utils_Tuple2(
-						A3($author$project$Applicative$loadAny, relUrl, fullText, model),
+						A2($author$project$Applicative$load, taskDocs, model),
 						$elm$core$Platform$Cmd$none);
 				} else {
-					var errormsg = result.a;
+					var warnings = result.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{
-								warnings: A2($elm$core$List$cons, 'Cannot fetch ' + relUrl, model.warnings)
-							}),
+							{warnings: warnings}),
 						$elm$core$Platform$Cmd$none);
 				}
 		}
 	});
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm$html$Html$h2 = _VirtualDom_node('h2');
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $author$project$Main$OnChangeContent = function (a) {
+	return {$: 'OnChangeContent', a: a};
+};
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -7168,62 +7952,268 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $elm$html$Html$Attributes$for = $elm$html$Html$Attributes$stringProperty('htmlFor');
-var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
-var $elm$html$Html$input = _VirtualDom_node('input');
-var $elm$html$Html$label = _VirtualDom_node('label');
-var $elm$html$Html$p = _VirtualDom_node('p');
-var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
-var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm$html$Html$Attributes$rows = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'rows',
+		$elm$core$String$fromInt(n));
+};
+var $elm$html$Html$textarea = _VirtualDom_node('textarea');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Main$viewContent = function (model) {
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('w-full md:w-1/2 px-3 mb-6 md:mb-0')
+				$elm$html$Html$Attributes$class('w-full m-3')
 			]),
 		_List_fromArray(
 			[
 				A2(
-				$elm$html$Html$label,
+				$elm$html$Html$textarea,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2'),
-						$elm$html$Html$Attributes$for('grid-first-name')
+						$elm$html$Html$Events$onInput($author$project$Main$OnChangeContent),
+						$elm$html$Html$Attributes$value(model.content),
+						$elm$html$Html$Attributes$class('appearance-none block w-full h-auto bg-gray-200 text-gray-700 border border-blue-500 rounded leading-tight focus:outline-none focus:bg-white'),
+						$elm$html$Html$Attributes$rows(8)
 					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('First Name      ')
-					])),
-				A2(
-				$elm$html$Html$input,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('appearance-none block w-full bg-gray-200 text-gray-700 border border-red-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white'),
-						$elm$html$Html$Attributes$id('grid-first-name'),
-						$elm$html$Html$Attributes$placeholder('Jane'),
-						$elm$html$Html$Attributes$type_('text')
-					]),
-				_List_Nil),
-				A2(
-				$elm$html$Html$p,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('text-red-500 text-xs italic')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Please fill out this field.')
-					]))
+				_List_Nil)
 			]));
 };
+var $elm$html$Html$a = _VirtualDom_node('a');
+var $elm$html$Html$footer = _VirtualDom_node('footer');
+var $elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
+var $elm$html$Html$p = _VirtualDom_node('p');
 var $elm$html$Html$span = _VirtualDom_node('span');
+var $elm$html$Html$strong = _VirtualDom_node('strong');
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $author$project$Main$viewFooter = A2(
+	$elm$html$Html$footer,
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('w-full bg-purple-200 bottom-0 m-3')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('m-4')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('text-purple-800 text-sm')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$strong,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('font-bold')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Interandroid Communication Language')
+								])),
+							$elm$html$Html$text(' by '),
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('underline'),
+									$elm$html$Html$Attributes$href('https://github.com/olih')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Olivier Huin')
+								])),
+							$elm$html$Html$text('. The language and the use of the language itself will have a very open license (to be discussed) in the spirit of '),
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$href('https://creativecommons.org/share-your-work/public-domain/cc0/')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$span,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text('the public domain ')
+										])),
+									A2(
+									$elm$html$Html$span,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('font-bold')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text(' CC0 ')
+										])),
+									A2(
+									$elm$html$Html$span,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('underline')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text(' No Rights Reserved')
+										]))
+								])),
+							$elm$html$Html$text('. The definition of each word in the dictionary should be licensed under '),
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('underline'),
+									$elm$html$Html$Attributes$href('https://creativecommons.org/licenses/by-sa/4.0/')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Creative Commons Attribution-ShareAlike 4.0 International License')
+								])),
+							$elm$html$Html$text('.')
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('text-purple-800 text-sm')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('A complete list of the vocabulary is '),
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('underline'),
+									$elm$html$Html$Attributes$href('https://github.com/barking-up-the-binary-tree/interandroid-fictional-language/blob/master/docs/data/en/core-vocabulary-translation.csv')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('available here')
+								]))
+						]))
+				]))
+		]));
+var $elm$html$Html$h2 = _VirtualDom_node('h2');
+var $author$project$Main$viewHeader = A2(
+	$elm$html$Html$div,
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('w-full bg-teal-900')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$elm$html$Html$h2,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('text-5xl text-center')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('text-white tracking-widest p-3')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('TRANSLATE')
+						])),
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('text-base text-white align-text-top')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('BETA')
+						]))
+				]))
+		]));
+var $author$project$Main$OnFlipTranslationDir = {$: 'OnFlipTranslationDir'};
+var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$html$Html$h3 = _VirtualDom_node('h3');
+var $author$project$WordInfo$matchAnyWordType = F2(
+	function (wordtypes, wordInfo) {
+		return A2($elm$core$List$member, wordInfo.wordType, wordtypes);
+	});
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
 var $author$project$Main$viewLanguageDirection = function (model) {
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('md:flex md:items-center mb-6')
+				$elm$html$Html$Attributes$class('container m-3 mx-auto')
 			]),
 		_List_fromArray(
 			[
@@ -7231,37 +8221,318 @@ var $author$project$Main$viewLanguageDirection = function (model) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('md:w-1/3')
-					]),
-				_List_Nil),
-				A2(
-				$elm$html$Html$label,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('md:w-2/3 block text-gray-500 font-bold')
+						$elm$html$Html$Attributes$class('flex flex-wrap text-center bg-gray-200')
 					]),
 				_List_fromArray(
 					[
 						A2(
-						$elm$html$Html$input,
+						$elm$html$Html$div,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('mr-2 leading-tight'),
-								$elm$html$Html$Attributes$type_('checkbox')
+								$elm$html$Html$Attributes$class('w-1/3 p-1')
 							]),
-						_List_Nil),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('text-white bg-gray-800 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg text-base'),
+										$elm$html$Html$Events$onClick($author$project$Main$OnFlipTranslationDir)
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('⇄')
+									]))
+							])),
 						A2(
-						$elm$html$Html$span,
+						$elm$html$Html$div,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('text-sm')
+								$elm$html$Html$Attributes$class('w-1/3 p-1')
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text('To interandroid')
+								A2(
+								$elm$html$Html$h3,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('title-font font-medium sm:text-4xl text-3xl text-gray-900')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(
+										$elm$core$String$fromInt(
+											$elm$core$List$length(
+												A2(
+													$elm$core$List$filter,
+													A2(
+														$elm$core$Basics$composeR,
+														$author$project$WordInfo$matchAnyWordType(
+															_List_fromArray(
+																[$author$project$WordType$WordSeparator, $author$project$WordType$ClauseSeparator, $author$project$WordType$SentenceClauseSeparator, $author$project$WordType$SentenceSeparator, $author$project$WordType$ParagraphSeparator])),
+														$elm$core$Basics$not),
+													model.wordInfoList))))
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('leading-relaxed')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Words')
+									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('w-1/3 p-1')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h3,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('title-font font-medium sm:text-4xl text-3xl text-gray-900')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(
+										$elm$core$String$fromInt(
+											1 + $elm$core$List$length(
+												A2(
+													$elm$core$List$filter,
+													$author$project$WordInfo$matchAnyWordType(
+														_List_fromArray(
+															[$author$project$WordType$SentenceSeparator])),
+													model.wordInfoList))))
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('leading-relaxed')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Sentences')
+									]))
 							]))
 					]))
 			]));
+};
+var $author$project$Main$OnGetWordInfo = function (a) {
+	return {$: 'OnGetWordInfo', a: a};
+};
+var $author$project$Main$firstTranslation = function (wordInfo) {
+	return A2(
+		$elm$core$Maybe$withDefault,
+		'???',
+		$elm$core$List$head(wordInfo.translations));
+};
+var $elm$html$Html$Events$onMouseOver = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseover',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $author$project$Main$viewPrettyWordInfoClass = function (wordInfo) {
+	var _v0 = wordInfo.wordType;
+	switch (_v0.$) {
+		case 'UnkwnownWord':
+			return '';
+		case 'IncorrectWord':
+			return '';
+		case 'WordSeparator':
+			return '';
+		case 'ClauseSeparator':
+			return '';
+		case 'SentenceClauseSeparator':
+			return '';
+		case 'SentenceSeparator':
+			return '';
+		case 'ParagraphSeparator':
+			return '';
+		case 'NounType':
+			return 'text-blue-800';
+		case 'VerbType':
+			return 'border-b-2 text-teal-800';
+		case 'AdjectiveType':
+			return '';
+		case 'AdverbType':
+			return '';
+		case 'PronounType':
+			return '';
+		case 'PrepositionType':
+			return '';
+		case 'ConjunctionType':
+			return '';
+		default:
+			return '';
+	}
+};
+var $author$project$Main$viewPrettyWordType = function (wordType) {
+	switch (wordType.$) {
+		case 'UnkwnownWord':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('font-thin text-red-800 align-text-top text-xs')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('(?)')
+					]));
+		case 'IncorrectWord':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('font-thin text-red-800 align-text-top text-xs')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('(??)')
+					]));
+		case 'WordSeparator':
+			return A2($elm$html$Html$span, _List_Nil, _List_Nil);
+		case 'ClauseSeparator':
+			return A2($elm$html$Html$span, _List_Nil, _List_Nil);
+		case 'SentenceClauseSeparator':
+			return A2($elm$html$Html$span, _List_Nil, _List_Nil);
+		case 'SentenceSeparator':
+			return A2($elm$html$Html$span, _List_Nil, _List_Nil);
+		case 'ParagraphSeparator':
+			return A2($elm$html$Html$span, _List_Nil, _List_Nil);
+		case 'NounType':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('font-thin text-gray-500 align-text-top text-xs')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('(N)')
+					]));
+		case 'VerbType':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('font-thin text-blue-500 align-text-top text-xs')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('(V)')
+					]));
+		case 'AdjectiveType':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('font-thin text-gray-500 align-text-top text-xs')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('(Adj)')
+					]));
+		case 'AdverbType':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('font-thin text-gray-500 align-text-top text-xs')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('(Adv)')
+					]));
+		case 'PronounType':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('font-thin text-gray-500 align-text-top text-xs')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('(P)')
+					]));
+		case 'PrepositionType':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('font-thin text-gray-500 align-text-top text-xs')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('(Pre)')
+					]));
+		case 'ConjunctionType':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('font-thin text-gray-500 align-text-top text-xs')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('(Cj)')
+					]));
+		default:
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('font-thin text-gray-500 align-text-top text-xs')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('(D)')
+					]));
+	}
+};
+var $author$project$Main$viewPrettyWordInfo = function (wordInfo) {
+	return _Utils_eq(wordInfo.wordType, $author$project$WordType$ParagraphSeparator) ? A2($elm$html$Html$p, _List_Nil, _List_Nil) : A2(
+		$elm$html$Html$span,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('hover:bg-yellow-400')
+			]),
+		_List_fromArray(
+			[
+				$author$project$Main$viewPrettyWordType(wordInfo.wordType),
+				A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class(
+						$author$project$Main$viewPrettyWordInfoClass(wordInfo)),
+						$elm$html$Html$Events$onMouseOver(
+						$author$project$Main$OnGetWordInfo(wordInfo.fictionalWord))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$author$project$Main$firstTranslation(wordInfo))
+					]))
+			]));
+};
+var $author$project$Main$viewPrettyContent = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('w-full m-3')
+			]),
+		A2($elm$core$List$map, $author$project$Main$viewPrettyWordInfo, model.wordInfoList));
 };
 var $elm$virtual_dom$VirtualDom$attribute = F2(
 	function (key, value) {
@@ -7271,136 +8542,8 @@ var $elm$virtual_dom$VirtualDom$attribute = F2(
 			_VirtualDom_noJavaScriptOrHtmlUri(value));
 	});
 var $elm$html$Html$Attributes$attribute = $elm$virtual_dom$VirtualDom$attribute;
-var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
-var $elm$html$Html$option = _VirtualDom_node('option');
-var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
-var $elm$html$Html$select = _VirtualDom_node('select');
-var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
-var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var $author$project$Main$viewLanguageWidget = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('w-full md:w-1/3 px-3 mb-6 md:mb-0')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$label,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2'),
-						$elm$html$Html$Attributes$for('grid-state')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('State      ')
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('relative')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$select,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500'),
-								$elm$html$Html$Attributes$id('grid-state')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$option,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text('English')
-									])),
-								A2(
-								$elm$html$Html$option,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text('French')
-									])),
-								A2(
-								$elm$html$Html$option,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Spanish')
-									]))
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$svg$Svg$svg,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('fill-current h-4 w-4'),
-										$elm$svg$Svg$Attributes$viewBox('0 0 20 20'),
-										A2($elm$html$Html$Attributes$attribute, 'xmlns', 'http://www.w3.org/2000/svg')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$elm$svg$Svg$path,
-										_List_fromArray(
-											[
-												$elm$svg$Svg$Attributes$d('M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z')
-											]),
-										_List_Nil)
-									]))
-							]))
-					]))
-			]));
-};
-var $author$project$Main$viewPrettyContent = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('w-full md:w-1/2 px-3 mb-6 md:mb-0')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$label,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2'),
-						$elm$html$Html$Attributes$for('grid-first-name')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('First Name      ')
-					])),
-				A2(
-				$elm$html$Html$p,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('text-red-500 text-xs italic')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Pretty content')
-					]))
-			]));
-};
 var $author$project$Main$viewWarnings = function (model) {
-	return A2(
+	return $elm$core$List$isEmpty(model.warnings) ? A2($elm$html$Html$div, _List_Nil, _List_Nil) : A2(
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
@@ -7431,153 +8574,278 @@ var $author$project$Main$viewWarnings = function (model) {
 						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$text('Something not ideal might be happening.')
+								$elm$html$Html$text(
+								A2($elm$core$String$join, ';', model.warnings))
 							]))
 					]))
 			]));
 };
-var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
-var $elm$html$Html$img = _VirtualDom_node('img');
-var $elm$html$Html$Attributes$src = function (url) {
+var $author$project$Applicative$getWordInfo = function (model) {
 	return A2(
-		$elm$html$Html$Attributes$stringProperty,
-		'src',
-		_VirtualDom_noJavaScriptOrHtmlUri(url));
+		$elm$core$Maybe$map,
+		$author$project$ReferenceModel$getWordInfo(model.refModel),
+		model.aboutWord);
 };
-var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
+var $author$project$Main$viewPrettyWordTypeExplicit = function (wordType) {
+	switch (wordType.$) {
+		case 'UnkwnownWord':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('bg-gray-900 text-red-400 px-1 py-1 rounded')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Unknown word')
+					]));
+		case 'IncorrectWord':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('bg-gray-900 text-red-400 px-1 py-1 rounded')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Incorrect word')
+					]));
+		case 'WordSeparator':
+			return A2($elm$html$Html$span, _List_Nil, _List_Nil);
+		case 'ClauseSeparator':
+			return A2($elm$html$Html$span, _List_Nil, _List_Nil);
+		case 'SentenceClauseSeparator':
+			return A2($elm$html$Html$span, _List_Nil, _List_Nil);
+		case 'SentenceSeparator':
+			return A2($elm$html$Html$span, _List_Nil, _List_Nil);
+		case 'ParagraphSeparator':
+			return A2($elm$html$Html$span, _List_Nil, _List_Nil);
+		case 'NounType':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('bg-gray-900 text-white px-1 py-1 rounded')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Noun')
+					]));
+		case 'VerbType':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('bg-gray-900 text-white px-1 py-1 rounded')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Verb')
+					]));
+		case 'AdjectiveType':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('bg-gray-900 text-white px-1 py-1 rounded')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Adjective')
+					]));
+		case 'AdverbType':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('bg-gray-900 text-white px-1 py-1 rounded')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Adverb')
+					]));
+		case 'PronounType':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('bg-gray-900 text-white px-1 py-1 rounded')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Pronoun')
+					]));
+		case 'PrepositionType':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('bg-gray-900 text-white px-1 py-1 rounded')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Preposition')
+					]));
+		case 'ConjunctionType':
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('bg-gray-900 text-white px-1 py-1 rounded')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Conjunction')
+					]));
+		default:
+			return A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('bg-gray-900 text-white px-1 py-1 rounded')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Determiner')
+					]));
+	}
+};
 var $author$project$Main$viewWordInfo = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('max-w-sm w-full lg:max-w-full lg:flex')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('h-48 lg:h-auto lg:w-48 flex-none bg-cover rounded-t lg:rounded-t-none lg:rounded-l text-center overflow-hidden'),
-						A2($elm$html$Html$Attributes$attribute, 'style', 'background-image: url(\'/img/card-left.jpg\')'),
-						$elm$html$Html$Attributes$title('Woman holding a mug')
-					]),
-				_List_Nil),
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('border-r border-b border-l border-gray-400 lg:border-l-0 lg:border-t lg:border-gray-400 bg-white rounded-b lg:rounded-b-none lg:rounded-r p-4 flex flex-col justify-between leading-normal')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('mb-8')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$p,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('text-sm text-gray-600 flex items-center')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$elm$svg$Svg$svg,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('fill-current text-gray-500 w-3 h-3 mr-2'),
-												$elm$svg$Svg$Attributes$viewBox('0 0 20 20'),
-												A2($elm$html$Html$Attributes$attribute, 'xmlns', 'http://www.w3.org/2000/svg')
-											]),
-										_List_fromArray(
-											[
-												A2(
-												$elm$svg$Svg$path,
-												_List_fromArray(
-													[
-														$elm$svg$Svg$Attributes$d('M4 8V6a6 6 0 1 1 12 0v2h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-8c0-1.1.9-2 2-2h1zm5 6.73V17h2v-2.27a2 2 0 1 0-2 0zM7 6v2h6V6a3 3 0 0 0-6 0z')
-													]),
-												_List_Nil),
-												$elm$html$Html$text('        ')
-											])),
-										$elm$html$Html$text('Members only      ')
-									])),
-								A2(
-								$elm$html$Html$div,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('text-gray-900 font-bold text-xl mb-2')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Can coffee make you a better developer?')
-									])),
-								A2(
-								$elm$html$Html$p,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('text-gray-700 text-base')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus quia, nulla! Maiores et perferendis eaque, exercitationem praesentium nihil.')
-									]))
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('flex items-center')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$img,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$alt('Avatar of Jonathan Reinink'),
-										$elm$html$Html$Attributes$class('w-10 h-10 rounded-full mr-4'),
-										$elm$html$Html$Attributes$src('/img/jonathan.jpg')
-									]),
-								_List_Nil),
-								A2(
-								$elm$html$Html$div,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('text-sm')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$p,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('text-gray-900 leading-none')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text('Jonathan Reinink')
-											])),
-										A2(
-										$elm$html$Html$p,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('text-gray-600')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text('Aug 18')
-											]))
-									]))
-							]))
-					]))
-			]));
+	var _v0 = $author$project$Applicative$getWordInfo(model);
+	if (_v0.$ === 'Nothing') {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('w-full')
+				]),
+			_List_Nil);
+	} else {
+		var wordInfo = _v0.a;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('box-border border-4 border-gray-400 bg-gray-200 w-1/2 m-3')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('w-full bg-gray-200 p-6')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$h3,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('font-mono text-black text-xl')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text(wordInfo.fictionalWord)
+								])),
+							A2(
+							$elm$html$Html$p,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$span,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('text-black text-xl mr-1')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text(
+											A2($elm$core$String$join, ' or ', wordInfo.translations))
+										])),
+									$author$project$Main$viewPrettyWordTypeExplicit(wordInfo.wordType),
+									A2(
+									$elm$html$Html$span,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('text-gray-700 ml-1 text-xl')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text(wordInfo.phonetic)
+										]))
+								])),
+							A2(
+							$elm$html$Html$p,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$span,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('text-gray-700')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('origin: ')
+										])),
+									A2(
+									$elm$html$Html$span,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('text-gray-700')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text(
+											A2($elm$core$Maybe$withDefault, '', wordInfo.origin))
+										]))
+								])),
+							A2(
+							$elm$html$Html$p,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('mt-1')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$span,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('text-blue-700')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text(
+											A2($elm$core$Maybe$withDefault, '', wordInfo.description))
+										]))
+								])),
+							A2(
+							$elm$html$Html$p,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('mt-1')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$span,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('text-blue-500')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text(
+											A2($elm$core$Maybe$withDefault, '', wordInfo.altDescription))
+										]))
+								]))
+						]))
+				]));
+	}
 };
 var $author$project$Main$view = function (model) {
 	return A2(
@@ -7585,19 +8853,13 @@ var $author$project$Main$view = function (model) {
 		_List_Nil,
 		_List_fromArray(
 			[
-				A2(
-				$elm$html$Html$h2,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Translate')
-					])),
-				$author$project$Main$viewLanguageWidget(model),
+				$author$project$Main$viewHeader,
 				$author$project$Main$viewLanguageDirection(model),
 				$author$project$Main$viewContent(model),
 				$author$project$Main$viewPrettyContent(model),
 				$author$project$Main$viewWordInfo(model),
-				$author$project$Main$viewWarnings(model)
+				$author$project$Main$viewWarnings(model),
+				$author$project$Main$viewFooter
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(

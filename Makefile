@@ -5,9 +5,15 @@ BUILD = docs
 HTML = elm/html
 
 vocabulary:
-	python tools/inject-vocabulary.py
+	python tools/inject-core-vocabulary.py
+	python tools/inject-core-vocabulary-media.py
+	python tools/inject-core-vocabulary-description.py
+	cat data/en/core-vocabulary-translation*.csv > docs/data/en/core-vocabulary-translation.csv
 
 build: build-directory vocabulary html js
+
+org:
+	python tools/organize-vocabulary.py
 
 build-directory:
 	mkdir -p $(BUILD)
@@ -15,13 +21,16 @@ build-directory:
 html:
 	cp $(HTML)/index.html $(BUILD)/index.html
 js:
-	cd elm; elm make $(SRC)/App.elm --output ../$(BUILD)/app.js
+	cd elm; elm make $(SRC)/Main.elm --output ../$(BUILD)/main.js
 
 start:
-	open http://localhost:7000; cd docs;python -m SimpleHTTPServer 7000
+	open -n -a "Google Chrome" --args --incognito http://localhost:7000; cd docs;http-server -p 7000
 
 beautify:
 	cd elm; elm-format src/ --yes
 
 test:
 	cd elm; elm-test
+
+syntax-color:
+	ln -s "`pwd`/vscode/interandroid" ~/.vscode/extensions/interandroid-0.0.1

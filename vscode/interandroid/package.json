@@ -1,0 +1,25 @@
+{
+    "name": "interandroid",
+    "displayName": "interandroid",
+    "description": "Interandroid Fictional Language Core",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.39.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "interandroid",
+            "aliases": ["Interandroid Core", "interandroid"],
+            "extensions": [".iandroid.txt"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "interandroid",
+            "scopeName": "source.iandroid",
+            "path": "./syntaxes/interandroid.tmLanguage.json"
+        }]
+    }
+}

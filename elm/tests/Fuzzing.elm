@@ -1,54 +1,67 @@
-module Fuzzing exposing (english, hexa, phonetic, visual)
+module Fuzzing exposing (oneOfList, nonEmptyList, droidBase12, stringBase12, refName, alpha, alphaNum, isErr, corruptWith)
 
-import Fuzz as Fuzz exposing (Fuzzer, custom, intRange)
-import Random as Random exposing (Generator)
-import Random.Char as RandChar
-import Random.Extra as RandExtra
-import Random.String as RandString
-import Shrink as Shrink exposing(Shrinker)
-
-import Maybe exposing (withDefault)
+import Fuzz as Fuzz exposing (Fuzzer, custom, intRange, list)
+import Base12 exposing (Base12(..))
 
 oneOfList: List a -> Fuzzer a
 oneOfList list =
     List.map Fuzz.constant list |> Fuzz.oneOf
 
-decimalFLChar : Generator Char
-decimalFLChar = 
-    RandExtra.sample ['┼', '╀', '┾', '╄', '╂', '╂', '╆', '╊', '┽', '┹']  
-        |> Random.map (Maybe.withDefault ' ')
+nonEmptyList: Fuzzer a -> Fuzzer (List a)
+nonEmptyList tofuzz =
+   list tofuzz |> Fuzz.map2 (\one base-> one :: base) tofuzz
+  
+base12Char : List Char
+base12Char = ['┼', '╀', '┾', '╄', '╁', '╂', '╆', '╊', '┽', '╃', '┿', '╇']
 
+upperChar : List Char
+upperChar =  List.range 65 90 |> List.map Char.fromCode
 
-decimalChar : Generator Char
-decimalChar = 
-    RandChar.char 48 57
+lowerChar : List Char
+lowerChar =  List.range 97 122 |> List.map Char.fromCode
 
-type alias Vocab = {
-    eng: String
-    , hexa: String
-    , phonetic: String
-    , visual: String
-    }
+digitChar : List Char
+digitChar =  List.range 48 57 |> List.map Char.fromCode
 
-englishHexaList = [
-    Vocab "blueberry" "6667" "beɪbɪʃ" "╆╆╆╊"
-    , Vocab "orange" "744" "gʊnʌ" "╊╁╁"
-    , Vocab "stuff" "910" "jɛpʌ" "┹╀┼"
-    , Vocab "mustard_green" "391574" "mjuːtaɪgʊ" "╄┹╀╂╊╁"
-    ]
+nonEmptyString : List Char -> Fuzzer String
+nonEmptyString allowedChars =
+   allowedChars |> oneOfList
+   |> list
+   |> Fuzz.map2 (\prefix base-> prefix :: base) (allowedChars |> oneOfList)
+   |> Fuzz.map String.fromList 
 
-english : Fuzzer String
-english = 
-    englishHexaList |> List.map .eng |> oneOfList
+droidBase12 : Fuzzer Char
+droidBase12 = base12Char |> oneOfList
 
-hexa : Fuzzer String
-hexa = 
-    englishHexaList |> List.map .hexa |> oneOfList
+dashName : Fuzzer String
+dashName =
+   lowerChar ++ digitChar ++ ['-'] |> nonEmptyString
 
-phonetic : Fuzzer String
-phonetic = 
-    englishHexaList |> List.map .phonetic |> oneOfList
+refPrefix : Fuzzer String
+refPrefix =
+    ["$", "@", "?"] |> oneOfList
 
-visual : Fuzzer String
-visual = 
-    englishHexaList |> List.map .visual |> oneOfList
+refName : Fuzzer String
+refName =
+   Fuzz.map2 (\p str -> p ++ str) refPrefix dashName 
+
+alphaNum: Fuzzer String
+alphaNum =
+   lowerChar ++ upperChar ++ digitChar |> nonEmptyString
+
+alpha: Fuzzer String
+alpha =
+   lowerChar ++ upperChar |> nonEmptyString
+
+stringBase12 : Fuzzer String
+stringBase12 = base12Char |> nonEmptyString
+
+isErr : Result error value -> Bool
+isErr result =
+    case result of
+        Ok value -> False
+        Err error -> True
+
+corruptWith: String -> String -> String
+corruptWith corruptor str =
+    corruptor ++ str ++ corruptor

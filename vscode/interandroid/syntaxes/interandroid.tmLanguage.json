@@ -1,0 +1,46 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Interandroid Core",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#constants"
+		},
+		{
+			"include": "#switches"
+		},
+		{
+			"include": "#variable"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.interandroid",
+				"match": "^\\?(all)\\s"
+			}]
+		}
+		,"constants": {
+			"patterns": [{
+				"name": "variable.other.interandroid",
+				"match": "=\\s([A-Z][A-Za-z0-9]+\\s*){1,12}\\s*$"
+			}]
+		}
+		,"switches": {
+			"patterns": [{
+				"name": "entity.name.type.interandroid",
+				"match": "=\\s(([A-Z][A-Za-z0-9]+)(:(\\?|@|\\$)[a-z0-9-]+)?\\s*){1,12}\\s*$"
+			}]
+		}
+		,"variable": {
+			"patterns": [{
+				"name": "entity.name.tag.interandroid",
+				"match": "^(\\?|@|\\$)[a-z0-9-]+\\b"
+			}]
+		}
+
+	},
+	"scopeName": "source.iandroid"
+}
