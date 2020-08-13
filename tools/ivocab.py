@@ -145,8 +145,10 @@ class EnterData:
 categories = [
     # { "name": "creature", "path": ['Noun', 'AllWord', "Creature"] },
     # { "name": "building", "path": ['Noun', 'AllWord', "Building"] },
-    { "name": "mendeleev", "path": ['Noun', 'AllWord', "KnownSeries", "Mendeleev"] },
+    # { "name": "status", "path": ['Noun', 'AllWord', "KnownSeries", "Status"] },
     # { "name": "concept", "path": ['Noun', 'AllConcept']},
+    # { "name": "math", "path": ['Noun', 'Math']},
+    { "name": "content", "path": ['Noun', 'Content']},
     # { "name": "pronoun", "path": ['Pronoun']},
     # { "name": "verb", "path": ['Verb']},
     # { "name": "adjective-active-verb", "path": ['Adjective', "ActiveVerb"]},
@@ -158,7 +160,7 @@ categories = [
     # { "name": "determiner", "path": ['Determiner']}
     ]
 
-def gen_new_word(count: int=30):
+def gen_new_word(count: int=100):
     if count <=0:
        print("No more words :-)")
        return
@@ -177,9 +179,12 @@ def gen_new_word(count: int=30):
 def next():
     return gen_new_word()
 
-def nextsearch(search: str):
-    for i in range(500):
+def nextsearch(search: str, search2: str =""):
+    for _ in range(500):
         new_word = gen_new_word()
-        if search in new_word.origin:
-            return new_word
+        if not search in new_word.origin:
+            continue
+        if len(search2)>0 and not search2 in new_word.origin:
+            continue
+        return new_word
     print("nothing found")
